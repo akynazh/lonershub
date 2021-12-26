@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <div th:replace="common :: common_css"></div>
+</head>
+<body>
+<div class="container">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <nav th:replace="common :: common_nav"></nav>
+            <div th:replace="common :: common_header"></div>
+            <div class="row clearfix">
+                <div class="col-md-8 column">
+                    <form role="form" method="post" th:action="@{/login}" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="lonerEmail">邮箱</label><input type="email"
+                                                                     name="lonerEmail"
+                                                                     class="form-control"
+                                                                     id="lonerEmail"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="lonerPassword">密码</label><input name="lonerPassword"
+                                                                        type="password"
+                                                                        class="form-control"
+                                                                        id="lonerPassword"/>
+                        </div>
+                        <button type="submit" class="btn btn-default">登录</button>
+                    </form>
+                </div>
+                <div class="col-md-4 column">
+                    <div class="jumbotron">
+                        <h2>
+                            还没有账号？
+                        </h2>
+                        <h2>
+                            来注册吧^-^
+                        </h2>
+                        <p>
+                            如果是平时总觉得孤独，融不入团体，就来这里吧！
+                        </p>
+                        <p>
+                            来这里和志同道合的朋友一起寻找快乐吧！
+                        </p>
+                        <p>
+                            来这里和大家一起分享自己的心情吧！
+                        </p>
+                        <p>
+                            <a class="btn btn-primary btn-large" th:href="@{/register}">去注册</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="common :: common_script"></div>
+</body>
+</html>
