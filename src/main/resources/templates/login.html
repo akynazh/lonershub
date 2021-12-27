@@ -14,6 +14,7 @@
             <div class="row clearfix">
                 <div class="col-md-8 column">
                     <form role="form" method="post" th:action="@{/login}" enctype="multipart/form-data">
+                        <p th:text="${session.msg}" style="color: red"></p>
                         <div class="form-group">
                             <label for="lonerEmail">邮箱</label><input type="email"
                                                                      name="lonerEmail"

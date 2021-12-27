@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 658766
+    url: jdbc:mysql://localhost:3306/lonersHub?serverTimezone=UTC
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false

@@ -18,16 +18,16 @@
 
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1"}>
         <ul class="nav navbar-nav" th:with="url=${#httpServletRequest.servletPath}">
-            <li th:class="${url.matches('/*') ?'active':''}">
+            <li th:class="${url.matches('/') || url.matches('/index') ?'active':''}">
                 <a th:href="@{/}">主页</a>
             </li>
-            <li th:class="${url.matches('/theater/*')?'active':''}">
+            <li th:class="${url.matches('/theater/?.*')?'active':''}">
                 <a th:href="@{/theater}">放映厅</a>
             </li>
-            <li th:class="${url.matches('/community/*')?'active':''}">
+            <li th:class="${url.matches('/community/?.*')?'active':''}">
                 <a th:href="@{/community}">交流区</a>
             </li>
-            <li th:class="${url.matches('/about/*')?'active':''}">
+            <li th:class="${url.matches('/about/?.*')?'active':''}">
                 <a th:href="@{/about}">关于作者</a>
             </li>
             <li class="dropdown">
@@ -96,8 +96,8 @@
         If you feel lonely, just come here, seek fun and share emotion with other loners!
     </p>
     <p>
-        <a class="btn btn-primary btn-large" th:href="@{/toLogin}">登录</a>
-        <a class="btn btn-primary btn-large" th:href="@{/toRegister}">注册</a>
+        <a class="btn btn-primary btn-large" th:href="@{/login}">登录</a>
+        <a class="btn btn-primary btn-large" th:href="@{/register}">注册</a>
     </p>
     <p>
 

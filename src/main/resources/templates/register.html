@@ -14,6 +14,7 @@
             <div class="row clearfix">
                 <div class="col-md-8 column">
                     <form role="form" method="post" th:action="@{/register}" enctype="multipart/form-data">
+                        <p th:text="${session.errorMsg}" style="color: green"></p>
                         <div class="form-group">
                             <label for="lonerName">用户名</label><input name="lonerName"
                                                                      type="text"
@@ -34,11 +35,11 @@
                                                                      id="lonerEmail"/>
                         </div>
                         <div class="form-group">
-                            <label for="lonerResidence">居住地</label><input
-                                placeholder="国家 + 城市" type="text"
-                                name="lonerResidence"
+                            <label for="lonerSignature">个性签名</label><input
+                                placeholder="不多于30个字段" type="text"
+                                name="lonerSignature"
                                 class="form-control"
-                                id="lonerResidence"/>
+                                id="lonerSignature"/>
                         </div>
                         <div class="form-group">
                             <label for="lonerAvatar">上传头像</label><input name="lonerAvatar"
