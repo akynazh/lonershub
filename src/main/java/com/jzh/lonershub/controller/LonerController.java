@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.jzh.lonershub.bean.Diary;
 import com.jzh.lonershub.bean.Loner;
 import com.jzh.lonershub.bean.LonerForm;
+import com.jzh.lonershub.service.DiaryService;
 import com.jzh.lonershub.service.LonerService;
 import org.apache.catalina.connector.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.util.DecodeUtils;
 import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -26,14 +28,25 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 
 @Controller
 public class LonerController {
-    final LonerService lonerService;
+    private LonerService lonerService;
+    private DiaryService diaryService;
 
     @Autowired
-    public LonerController(LonerService lonerService) {
+    public void setLonerService(LonerService lonerService) {
         this.lonerService = lonerService;
+    }
+
+    @Autowired
+    public void setDiaryService(DiaryService diaryService) {
+        this.diaryService = diaryService;
     }
 
     @GetMapping(value = {"/index", "/"})
@@ -81,7 +94,7 @@ public class LonerController {
             if (!uploadPath.exists()) uploadPath.mkdirs();
             try {
                 lonerAvatar.transferTo(uploadPath);
-                lonerAvatarUrl = "/avatar/fileName";
+                lonerAvatarUrl = "/avatar/" + fileName;
             } catch (IOException e) {
                 session.setAttribute("errorMsg","图片上传失败");
                 e.printStackTrace();
@@ -116,9 +129,9 @@ public class LonerController {
         loner.setLonerSignature(lonerForm.getLonerSignature());
         if (lonerAvatarUrl == null) lonerAvatarUrl = "/avatar/default.jpg";
         loner.setLonerAvatarUrl(lonerAvatarUrl);
-        System.out.println(loner);
         boolean save = lonerService.save(loner);
         if (save) {
+            System.out.println(loner);
             session.setAttribute("successLoner", loner);
         } else {
             session.setAttribute("errorMsg", "注册失败，请重试");
@@ -149,8 +162,30 @@ public class LonerController {
             return "/login";
         }
     }
-    @GetMapping(value = {"/success", "/space"})
-    public String success() {
+    @GetMapping(value = {"/success"})
+    public String success(HttpSession session, Model model) {
+        Loner successLoner = (Loner) session.getAttribute("successLoner");
+        Integer lonerId = successLoner.getLonerId();
+        QueryWrapper<Diary> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("creatorId", lonerId);
+        List<Diary> diaryList = diaryService.list(queryWrapper);
+        // 首先输出最新的日记
+        diaryList.sort(new Comparator<Diary>() {
+            @Override
+            public int compare(Diary o1, Diary o2) {
+                String t1 = o1.getCreateTime();
+                String t2 = o2.getCreateTime();
+                try {
+                    Date d1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(t1);
+                    Date d2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(t2);
+                    return d2.compareTo(d1); // 如果d2大于d1则交换
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                return -1;
+            }
+        });
+        model.addAttribute("diaryList", diaryList);
         return "/success";
     }
 

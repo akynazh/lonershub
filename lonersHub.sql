@@ -40,6 +40,14 @@ CREATE TABLE t_message (
                            content TEXT,
                            FOREIGN KEY (creatorId) REFERENCES t_loner(lonerId)
 );
+
+ALTER DATABASE lonersHub DEFAULT CHARACTER SET utf8;
+ALTER TABLE t_loner CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE t_diary CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE t_video CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE t_message CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE t_participant CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+
 INSERT INTO t_loner(lonerName, lonerPassword, lonerEmail, lonerAvatarUrl, lonerSignature) VALUES ("admin", "658766", "1945561232@qq.com", "/avatar/1640530359744.jpg", "hello world");
 INSERT INTO t_diary(creatorId, createTime, content) VALUES (1, "2021-12-26 22:53:11", "first blood");
 INSERT INTO t_video(startTime, publisherId, videoUrl, description) VALUES ("2021-12-26 15:08:00", 1, "/video/1640530359744.mp4", "test video");

@@ -1,5 +1,7 @@
 package com.jzh.lonershub.bean;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +16,7 @@ import javax.validation.Valid;
 @ToString
 @TableName("t_loner")
 public class Loner {
+    @TableId(value = "lonerId", type = IdType.AUTO)
     private Integer lonerId;
     private String lonerName;
     private String lonerPassword;

@@ -5,6 +5,7 @@
     <title>Common</title>
     <div th:fragment="common_css">
         <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+        <link th:href="@{/css/common.css}" rel="stylesheet">
     </div>
 </head>
 <body>
@@ -20,6 +21,9 @@
         <ul class="nav navbar-nav" th:with="url=${#httpServletRequest.servletPath}">
             <li th:class="${url.matches('/') || url.matches('/index') ?'active':''}">
                 <a th:href="@{/}">主页</a>
+            </li>
+            <li th:class="${url.matches('/success/?.*')?'active':''}">
+                <a th:href="@{/success}">个人空间</a>
             </li>
             <li th:class="${url.matches('/theater/?.*')?'active':''}">
                 <a th:href="@{/theater}">放映厅</a>
