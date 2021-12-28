@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.io.File;
@@ -59,18 +62,17 @@ public class LonerController {
 
     @GetMapping(value = {"/index", "/"})
     public String index() {
-        return "/index";
+        return "index";
     }
 
     @GetMapping(value = "/login")
-    public String toLogin(HttpSession session) {
-        return "/login";
+    public String toLogin() {
+        return "login";
     }
 
     @GetMapping(value = "/register")
-    public String toRegister(HttpSession session) {
-        session.removeAttribute("errorMsg");
-        return "/register";
+    public String toRegister() {
+        return "register";
     }
 
     /**
@@ -79,17 +81,16 @@ public class LonerController {
      * @date 2021/12/28 14:55
      */
     @PostMapping(value = "/register")
-    public String register(@Valid LonerForm lonerForm, BindingResult br, HttpSession session) throws FileNotFoundException, UnsupportedEncodingException {
-        session.removeAttribute("errorMsg");
+    public String register(@Valid LonerForm lonerForm, BindingResult br, HttpSession session, HttpServletResponse response) throws IOException {
 
         // 判断表单是否填写有误
         if (br.hasErrors()) {
             StringBuilder errorMsg = new StringBuilder();
             for (ObjectError error : br.getAllErrors()) {
-                errorMsg.append(error.getDefaultMessage()).append(" ");
+                errorMsg.append(error.getDefaultMessage()).append("~");
             }
-            session.setAttribute("errorMsg", errorMsg);
-            return "/register";
+            response.addCookie(new Cookie("errorMsg", errorMsg.toString()));
+            return "register";
         }
 
         // 处理头像上传并获取图片地址
@@ -102,8 +103,8 @@ public class LonerController {
             if (type != null) {
                 myType = type.substring(type.indexOf('/') + 1);
             } else {
-                session.setAttribute("errorMsg", "图片格式错误");
-                return "/register";
+                response.addCookie(new Cookie("errorMsg", "图片格式错误"));
+                return "register";
             }
             // 获取上传地址
             File relativePath = new File(URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(), "utf-8"));
@@ -115,9 +116,9 @@ public class LonerController {
                 lonerAvatar.transferTo(uploadPath);
                 lonerAvatarUrl = "/avatar/" + fileName;
             } catch (IOException e) {
-                session.setAttribute("errorMsg","图片上传失败");
+                response.addCookie(new Cookie("errorMsg", "图片上传失败"));
                 e.printStackTrace();
-                return "/register";
+                return "register";
             }
         }
 
@@ -126,8 +127,8 @@ public class LonerController {
         queryWrapper.eq("lonerEmail", lonerForm.getLonerEmail());
         Loner one = lonerService.getOne(queryWrapper);
         if (one != null) {
-            session.setAttribute("errorMsg", "邮箱已经被注册");
-            return "/register";
+            response.addCookie(new Cookie("errorMsg", "邮箱已经被注册"));
+            return "register";
         }
 
         // 写入数据库
@@ -143,8 +144,8 @@ public class LonerController {
             System.out.println(loner);
             session.setAttribute("successLoner", loner);
         } else {
-            session.setAttribute("errorMsg", "注册失败，请重试");
-            return "/register";
+            response.addCookie(new Cookie("errorMsg", "注册失败，请重试"));
+            return "register";
         }
         return "redirect:/success";
     }
@@ -157,18 +158,18 @@ public class LonerController {
     @PostMapping(value = "/login")
     public String login(@RequestParam String lonerEmail,
                         @RequestParam String lonerPassword,
-                        HttpSession session) {
+                        HttpSession session,
+                        HttpServletResponse response) {
 
         QueryWrapper<Loner> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("lonerEmail", lonerEmail);
         Loner loner = lonerService.getOne(queryWrapper);
         if (loner != null && loner.getLonerPassword().equals(lonerPassword)) {
             session.setAttribute("successLoner", loner);
-            session.removeAttribute("msg");
             return "redirect:/success";
         } else {
-            session.setAttribute("msg", "账号或密码错误");
-            return "/login";
+            response.addCookie(new Cookie("errorMsg", "账号或密码错误"));
+            return "login";
         }
     }
 
@@ -180,7 +181,7 @@ public class LonerController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "/index";
+        return "index";
     }
 
     /**
@@ -189,33 +190,19 @@ public class LonerController {
      * @date 2021/12/28 14:56
      */
     @GetMapping(value = {"/success"})
-    public String success(HttpSession session, Model model) {
+    public String success(@RequestParam(defaultValue = "1") Integer pn,  HttpSession session, Model model) {
+        // 获取当前Loner的ID
         Loner successLoner = (Loner) session.getAttribute("successLoner");
         Integer lonerId = successLoner.getLonerId();
         QueryWrapper<Diary> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("creatorId", lonerId);
-        List<Diary> diaryList = diaryService.list(queryWrapper);
-        // 首先输出最新的日记
-        diaryList.sort(new Comparator<Diary>() {
-            @Override
-            public int compare(Diary o1, Diary o2) {
-                String t1 = o1.getCreateTime();
-                String t2 = o2.getCreateTime();
-                try {
-                    Date d1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(t1);
-                    Date d2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(t2);
-                    return d2.compareTo(d1); // 如果d2大于d1则交换
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                return -1;
-            }
-        });
-        model.addAttribute("diaryList", diaryList);
-        return "/success";
+        // 按日期降序排序
+        queryWrapper.orderByDesc("createTime");
+
+        Page<Diary> diaryPage = diaryService.page(new Page<>(pn, 6), queryWrapper);
+        model.addAttribute("diaryPage", diaryPage);
+        return "success";
     }
-
-
 
     /**
      * @description: 用户修改个人信息
@@ -223,20 +210,22 @@ public class LonerController {
      * @date 2021/12/28 14:56
      */
     @PostMapping(value = "/success/modify")
-    public String modify(@Valid LonerForm lonerForm, BindingResult br, HttpSession session) throws FileNotFoundException, UnsupportedEncodingException {
-        session.removeAttribute("errorMsg");
+    public String modify(@Valid LonerForm lonerForm, BindingResult br,
+                         HttpSession session, HttpServletResponse response) throws IOException {
         Loner successLoner = (Loner) session.getAttribute("successLoner");
         UpdateWrapper<Loner> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("lonerId", successLoner.getLonerId());
+        boolean flag = false; // 标记是否改变
 
         // 判断表单是否填写有误
         if (br.hasErrors()) {
             StringBuilder errorMsg = new StringBuilder();
             for (ObjectError error : br.getAllErrors()) {
-                errorMsg.append(error.getDefaultMessage()).append(" ");
+                errorMsg.append(error.getDefaultMessage()).append("~");
             }
-            session.setAttribute("errorMsg", errorMsg);
-            return "/success";
+            Cookie cookie = new Cookie("errorMsg", errorMsg.toString());
+            response.addCookie(cookie);
+            return "redirect:/success";
         }
 
         MultipartFile lonerAvatar = lonerForm.getLonerAvatar();
@@ -248,8 +237,8 @@ public class LonerController {
             if (type != null) {
                 myType = type.substring(type.indexOf('/') + 1);
             } else {
-                session.setAttribute("errorMsg", "图片格式错误");
-                return "/register";
+                response.addCookie(new Cookie("errorMsg", "图片格式错误"));
+                return "redirect:/success";
             }
             // 获取上传地址
             File relativePath = new File(URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(), "utf-8"));
@@ -261,10 +250,11 @@ public class LonerController {
                 lonerAvatar.transferTo(uploadPath);
                 String lonerAvatarUrl = "/avatar/" + fileName;
                 updateWrapper.set("lonerAvatarUrl", lonerAvatarUrl);
+                flag = true;
             } catch (IOException e) {
-                session.setAttribute("errorMsg","图片上传失败");
+                response.addCookie(new Cookie("errorMsg", "图片上传失败"));
                 e.printStackTrace();
-                return "/success";
+                return "redirect:/success";
             }
         }
 
@@ -275,36 +265,42 @@ public class LonerController {
             queryWrapper.eq("lonerEmail", lonerForm.getLonerEmail());
             Loner one = lonerService.getOne(queryWrapper);
             if (one != null) {
-                session.setAttribute("errorMsg", "邮箱已经被注册");
-                return "/success";
+                response.addCookie(new Cookie("errorMsg", "邮箱已经被注册"));
+                return "redirect:/success";
             } else {
                 updateWrapper.set("lonerEmail", lonerForm.getLonerEmail());
+                flag = true;
             }
         }
 
         // 如果修改用户名
         if (!successLoner.getLonerName().equals(lonerForm.getLonerName())) {
             updateWrapper.set("lonerName", lonerForm.getLonerName());
+            flag = true;
         }
 
         // 如果修改密码
         if (!successLoner.getLonerPassword().equals(lonerForm.getLonerPassword())) {
             updateWrapper.set("lonerPassword", lonerForm.getLonerPassword());
+            flag = true;
         }
 
         // 如果修改个性签名
         if (!successLoner.getLonerSignature().equals(lonerForm.getLonerSignature())) {
             updateWrapper.set("lonerSignature", lonerForm.getLonerSignature());
+            flag = true;
         }
 
-        // 更新数据库对象
-        boolean update = lonerService.update(updateWrapper);
-        if (update) {
-            Loner newLoner = lonerService.getOne(new QueryWrapper<Loner>().eq("lonerId", successLoner.getLonerId()));
-            session.setAttribute("successLoner", newLoner);
-        } else {
-            session.setAttribute("errorMsg", "修改失败，请重试");
-            return "/success";
+        if (flag) {
+            // 更新数据库对象
+            boolean update = lonerService.update(updateWrapper);
+            if (update) {
+                Loner newLoner = lonerService.getOne(new QueryWrapper<Loner>().eq("lonerId", successLoner.getLonerId()));
+                session.setAttribute("successLoner", newLoner);
+            } else {
+                response.addCookie(new Cookie("errorMsg", "保存失败"));
+                return "redirect:/success";
+            }
         }
         return "redirect:/success";
     }

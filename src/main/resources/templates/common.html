@@ -10,8 +10,9 @@
 </head>
 <body>
 <nav th:fragment="common_nav" class="navbar navbar-default navbar-inverse" role="navigation">
+    <div class="alert"></div>
     <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
             <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span
                 class="icon-bar"></span><span class="icon-bar"></span></button>
         <a class="navbar-brand" th:href="@{/}">LonersHub</a>
@@ -114,6 +115,7 @@
 
 <div th:fragment="common_script">
     <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script th:src="@{/script/common.js}"></script>
 </div>

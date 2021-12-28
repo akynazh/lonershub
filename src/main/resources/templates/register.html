@@ -14,7 +14,6 @@
             <div class="row clearfix">
                 <div class="col-md-8 column">
                     <form role="form" method="post" th:action="@{/register}" enctype="multipart/form-data">
-                        <p th:text="${session.errorMsg}" style="color: green"></p>
                         <div class="form-group">
                             <label for="lonerName">用户名</label><input name="lonerName"
                                                                      type="text"

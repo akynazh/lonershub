@@ -28,14 +28,20 @@
                             </li>
                         </ul>
                         <div class="tab-content">
-                            <p th:text="${session.errorMsg}" style="color: red"></p>
                             <div class="tab-pane active" id="panel-69185">
-                                <div th:each="diary:${diaryList}">
-                                    <blockquote>
-                                        <p th:text="${diary.getContent()}"></p>
-                                        <small th:text="${diary.getCreateTime()}"></small>
-                                    </blockquote>
-                                </div>
+                                <ul class="pagination" th:with="cur=${diaryPage.getCurrent()}, sum=${diaryPage.getPages()},
+                                        diaries=${diaryPage.getRecords()}">
+                                    <div th:each="diary:${diaries}">
+                                        <blockquote>
+                                            <p th:text="${diary.getContent()}"></p>
+                                            <small th:text="${diary.getCreateTime()}"></small>
+                                        </blockquote>
+                                    </div>
+                                    <li class="disabled"><a th:text="'共 ' + ${sum} + ' 页'"></a></li>
+                                    <li><a th:class="${cur - 1 > 0 ? '' : 'btn disabled'}" th:text="上一页" th:href="@{/success(pn=${cur - 1})}"></a></li>
+                                    <li class="disabled"><a th:text="'第 ' + ${cur} + ' 页'"></a></li>
+                                    <li><a th:class="${cur + 1 <= sum ? '' : 'btn disabled'}" th:text="下一页" th:href="@{/success(pn=${cur + 1})}"></a></li>
+                                </ul>
                             </div>
                             <div class="tab-pane" id="panel-989949">
                                 <form role="form" method="post" th:action="@{/success/write}">
@@ -69,7 +75,6 @@
                             </div>
                             <div class="tab-pane" id="panel-123456">
                                 <form role="form" method="post" th:action="@{/success/modify}" enctype="multipart/form-data">
-                                    <p th:text="${session.errorMsg}" style="color: green"></p>
                                     <div class="form-group">
                                         <label for="lonerName">用户名</label><input name="lonerName"
                                                                                  th:value="${session.successLoner.getLonerName()}"

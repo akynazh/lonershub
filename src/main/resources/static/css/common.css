@@ -1,3 +1,22 @@
 * {
     font-family: "Times New Roman", SansSerif, sans-serif;
 }
+
+.alert {
+    display: none;
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    min-width: 200px;
+    margin-left: -100px;
+    z-index: 99999;
+    padding: 15px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.alert-info {
+    color: red;
+    font-weight: bold;
+    background-color: lightcyan;
+    border-color: #bce8f1;
+}

@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -31,7 +34,7 @@ public class DiaryController {
     }
 
     @PostMapping(value = "/success/write")
-    public String write(@RequestParam String content, HttpSession session) {
+    public String write(@RequestParam String content, HttpSession session, HttpServletResponse response) throws IOException {
         if (!StringUtils.hasText(content)) {
             content = "无话可说...";
         }
@@ -43,7 +46,8 @@ public class DiaryController {
         diary.setCreateTime(creatTime);
         diary.setContent(content);
         if (!diaryService.save(diary)) {
-            session.setAttribute("errorMsg", "保存失败");
+            response.addCookie(new Cookie("errorMsg", "保存失败"));
+            return "redirect:/success";
         }
         return "redirect:/success";
     }
