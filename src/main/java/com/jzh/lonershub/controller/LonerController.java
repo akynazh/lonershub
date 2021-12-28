@@ -1,6 +1,9 @@
 package com.jzh.lonershub.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jzh.lonershub.bean.Diary;
 import com.jzh.lonershub.bean.Loner;
 import com.jzh.lonershub.bean.LonerForm;
@@ -34,6 +37,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @description: 用户控制器，包括登录，注册，修改信息等功能
+ * @author Jiang Zhihang
+ * @date 2021/12/28 14:54
+ */
 @Controller
 public class LonerController {
     private LonerService lonerService;
@@ -66,13 +74,24 @@ public class LonerController {
     }
 
     /**
-     * 注册用户
-     * @param lonerForm 用户表单对象
-     * @param br 表单填写验证错误值
+     * @description: 注册用户
+     * @author Jiang Zhihang
+     * @date 2021/12/28 14:55
      */
     @PostMapping(value = "/register")
     public String register(@Valid LonerForm lonerForm, BindingResult br, HttpSession session) throws FileNotFoundException, UnsupportedEncodingException {
         session.removeAttribute("errorMsg");
+
+        // 判断表单是否填写有误
+        if (br.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder();
+            for (ObjectError error : br.getAllErrors()) {
+                errorMsg.append(error.getDefaultMessage()).append(" ");
+            }
+            session.setAttribute("errorMsg", errorMsg);
+            return "/register";
+        }
+
         // 处理头像上传并获取图片地址
         String lonerAvatarUrl = null;
         MultipartFile lonerAvatar = lonerForm.getLonerAvatar();
@@ -100,16 +119,6 @@ public class LonerController {
                 e.printStackTrace();
                 return "/register";
             }
-        }
-
-        // 判断表单是否填写有误
-        if (br.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-            for (ObjectError error : br.getAllErrors()) {
-                errorMsg.append(error.getDefaultMessage()).append(" ");
-            }
-            session.setAttribute("errorMsg", errorMsg);
-            return "/register";
         }
 
         // 判断邮箱是否已经被注册
@@ -141,9 +150,9 @@ public class LonerController {
     }
 
     /**
-     * 用户登录
-     * @param lonerEmail 登录邮箱
-     * @param lonerPassword 登录密码
+     * @description: 用户登录
+     * @author Jiang Zhihang
+     * @date 2021/12/28 14:55
      */
     @PostMapping(value = "/login")
     public String login(@RequestParam String lonerEmail,
@@ -162,6 +171,23 @@ public class LonerController {
             return "/login";
         }
     }
+
+    /**
+     * @description: 用户退出登录
+     * @author Jiang Zhihang
+     * @date 2021/12/28 14:56
+     */
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "/index";
+    }
+
+    /**
+     * @description: 登录成功后显示成功页面
+     * @author Jiang Zhihang
+     * @date 2021/12/28 14:56
+     */
     @GetMapping(value = {"/success"})
     public String success(HttpSession session, Model model) {
         Loner successLoner = (Loner) session.getAttribute("successLoner");
@@ -189,8 +215,97 @@ public class LonerController {
         return "/success";
     }
 
-    @PostMapping(value = "/update")
-    public String update() {
-        return null;
+
+
+    /**
+     * @description: 用户修改个人信息
+     * @author Jiang Zhihang
+     * @date 2021/12/28 14:56
+     */
+    @PostMapping(value = "/success/modify")
+    public String modify(@Valid LonerForm lonerForm, BindingResult br, HttpSession session) throws FileNotFoundException, UnsupportedEncodingException {
+        session.removeAttribute("errorMsg");
+        Loner successLoner = (Loner) session.getAttribute("successLoner");
+        UpdateWrapper<Loner> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("lonerId", successLoner.getLonerId());
+
+        // 判断表单是否填写有误
+        if (br.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder();
+            for (ObjectError error : br.getAllErrors()) {
+                errorMsg.append(error.getDefaultMessage()).append(" ");
+            }
+            session.setAttribute("errorMsg", errorMsg);
+            return "/success";
+        }
+
+        MultipartFile lonerAvatar = lonerForm.getLonerAvatar();
+        // 如果修改头像
+        if (lonerAvatar.getSize() > 0) {
+            // 获取图片类型
+            String type = lonerAvatar.getContentType();
+            String myType;
+            if (type != null) {
+                myType = type.substring(type.indexOf('/') + 1);
+            } else {
+                session.setAttribute("errorMsg", "图片格式错误");
+                return "/register";
+            }
+            // 获取上传地址
+            File relativePath = new File(URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(), "utf-8"));
+            File path = relativePath.getAbsoluteFile(); // 获取路径为： ${project}/target/classes/ 或者 ${jar包}/
+            String fileName = System.currentTimeMillis() + "." + myType;
+            File uploadPath = new File(path, "/static/avatar/" + fileName);
+            if (!uploadPath.exists()) uploadPath.mkdirs();
+            try {
+                lonerAvatar.transferTo(uploadPath);
+                String lonerAvatarUrl = "/avatar/" + fileName;
+                updateWrapper.set("lonerAvatarUrl", lonerAvatarUrl);
+            } catch (IOException e) {
+                session.setAttribute("errorMsg","图片上传失败");
+                e.printStackTrace();
+                return "/success";
+            }
+        }
+
+        // 如果修改邮箱
+        if (!successLoner.getLonerEmail().equals(lonerForm.getLonerEmail())) {
+            // 判断邮箱是否已经被注册
+            QueryWrapper<Loner> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("lonerEmail", lonerForm.getLonerEmail());
+            Loner one = lonerService.getOne(queryWrapper);
+            if (one != null) {
+                session.setAttribute("errorMsg", "邮箱已经被注册");
+                return "/success";
+            } else {
+                updateWrapper.set("lonerEmail", lonerForm.getLonerEmail());
+            }
+        }
+
+        // 如果修改用户名
+        if (!successLoner.getLonerName().equals(lonerForm.getLonerName())) {
+            updateWrapper.set("lonerName", lonerForm.getLonerName());
+        }
+
+        // 如果修改密码
+        if (!successLoner.getLonerPassword().equals(lonerForm.getLonerPassword())) {
+            updateWrapper.set("lonerPassword", lonerForm.getLonerPassword());
+        }
+
+        // 如果修改个性签名
+        if (!successLoner.getLonerSignature().equals(lonerForm.getLonerSignature())) {
+            updateWrapper.set("lonerSignature", lonerForm.getLonerSignature());
+        }
+
+        // 更新数据库对象
+        boolean update = lonerService.update(updateWrapper);
+        if (update) {
+            Loner newLoner = lonerService.getOne(new QueryWrapper<Loner>().eq("lonerId", successLoner.getLonerId()));
+            session.setAttribute("successLoner", newLoner);
+        } else {
+            session.setAttribute("errorMsg", "修改失败，请重试");
+            return "/success";
+        }
+        return "redirect:/success";
     }
 }

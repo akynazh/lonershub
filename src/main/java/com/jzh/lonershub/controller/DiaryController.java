@@ -16,6 +16,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * @description: 日记控制器，包括日记编写，上传及展示等功能
+ * @author Jiang Zhihang
+ * @date 2021/12/28 14:54
+ */
 @Controller
 public class DiaryController {
     private DiaryService diaryService;

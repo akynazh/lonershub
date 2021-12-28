@@ -49,10 +49,12 @@
                                 </form>
                             </div>
                             <div class="tab-pane" id="panel-658766">
-                                <form role="form" method="post" th:action="@{/success/upload}" enctype="multipart/form-data">
+                                <form role="form" method="post" th:action="@{/success/upload}"
+                                      enctype="multipart/form-data">
                                     <div class="form-group">
                                         <label for="startTime">预约时间</label>
-                                        <input type="datetime-local" name="startTime" class="form-control" id="startTime">
+                                        <input type="datetime-local" name="startTime" class="form-control"
+                                               id="startTime">
                                     </div>
                                     <div class="form-group">
                                         <label for="description">video介绍</label>
@@ -66,9 +68,48 @@
                                 </form>
                             </div>
                             <div class="tab-pane" id="panel-123456">
-                                <p>
-                                    修改个人信息
-                                </p>
+                                <form role="form" method="post" th:action="@{/success/modify}" enctype="multipart/form-data">
+                                    <p th:text="${session.errorMsg}" style="color: green"></p>
+                                    <div class="form-group">
+                                        <label for="lonerName">用户名</label><input name="lonerName"
+                                                                                 th:value="${session.successLoner.getLonerName()}"
+                                                                                 type="text"
+                                                                                 class="form-control"
+                                                                                 id="lonerName"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lonerPassword">密码</label><input name="lonerPassword"
+                                                                                    th:value="${session.successLoner.getLonerPassword()}"
+                                                                                    placeholder="不大于32位"
+                                                                                    type="password"
+                                                                                    class="form-control"
+                                                                                    id="lonerPassword"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lonerEmail">邮箱</label><input type="email"
+                                                                                 th:value="${session.successLoner.getLonerEmail()}"
+                                                                                 name="lonerEmail"
+                                                                                 class="form-control"
+                                                                                 id="lonerEmail"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lonerSignature">个性签名</label><input
+                                            placeholder="不多于30个字段" type="text"
+                                            th:value="${session.successLoner.getLonerSignature()}"
+                                            name="lonerSignature"
+                                            class="form-control"
+                                            id="lonerSignature"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lonerAvatar">上传头像</label><input name="lonerAvatar"
+                                                                                    type="file"
+                                                                                    id="lonerAvatar"/>
+                                        <p class="help-block">
+
+                                        </p>
+                                    </div>
+                                    <button type="submit" class="btn btn-default">保存</button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -77,15 +118,16 @@
                     <div class="list-group">
                         <div class="list-group-item active">用户名</div>
                         <div class="list-group-item">
-                            <h3 style="color: darkred; font-weight: bold" th:text="${session.successLoner.getLonerName()}"></h3>
+                            <h3 style="color: darkred; font-weight: bold"
+                                th:text="${session.successLoner.getLonerName()}"></h3>
                         </div>
                         <img class="img-responsive" alt="140x140" th:src="${session.successLoner.getLonerAvatarUrl()}"/>
                         <div class="list-group-item">
-                            <h3 style="color: darkgreen; font-weight: bold" th:text="${session.successLoner.getLonerSignature()}"></h3>
+                            <h3 style="color: darkgreen; font-weight: bold"
+                                th:text="${session.successLoner.getLonerSignature()}"></h3>
                         </div>
                         <div class="list-group-item active" style="background: green">个性签名</div>
                     </div>
-
                 </div>
             </div>
         </div>
