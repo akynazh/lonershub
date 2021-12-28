@@ -33,7 +33,7 @@ public class DiaryController {
         this.diaryService = diaryService;
     }
 
-    @PostMapping(value = "/success/write")
+    @PostMapping(value = "/success/diary/write")
     public String write(@RequestParam String content, HttpSession session, HttpServletResponse response) throws IOException {
         if (!StringUtils.hasText(content)) {
             content = "无话可说...";
@@ -51,4 +51,14 @@ public class DiaryController {
         }
         return "redirect:/success";
     }
+
+    @PostMapping(value = "/success/diary/delete")
+    public String delete(@RequestParam Integer id, HttpServletResponse response) {
+        if (!diaryService.removeById(id)) {
+            response.addCookie(new Cookie("errorMsg", "删除失败"));
+        }
+        return "redirect:/success";
+    }
 }
+
+

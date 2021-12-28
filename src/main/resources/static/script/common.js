@@ -7,4 +7,7 @@ $(document).ready(function () {
         // 访问/success/modify并设置cookie，又重定向到/success，cookie路径为'/success'
         // 访问/success并设置cookie，cookie路径为'/'
     }
+    $('#deleteDiary').click(function () {
+        $('.deleteDiv').css('display', 'block');
+    })
 })

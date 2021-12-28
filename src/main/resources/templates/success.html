@@ -11,6 +11,7 @@
         <div class="col-md-12 column">
             <nav th:replace="common :: common_nav"></nav>
             <div class="row clearfix">
+
                 <div class="col-md-8 column">
                     <div class="tabbable" id="tabs-350492">
                         <ul class="nav nav-tabs">
@@ -35,16 +36,23 @@
                                         <blockquote>
                                             <p th:text="${diary.getContent()}"></p>
                                             <small th:text="${diary.getCreateTime()}"></small>
+                                            <div class="deleteDiv" style="display: none">
+                                                <form th:action="@{/success/diary/delete(id=${diary.getDiaryId()})}" method="post">
+                                                    <input type="submit" value="删除" class="btn btn-default"/>
+                                                </form>
+                                            </div>
                                         </blockquote>
                                     </div>
                                     <li class="disabled"><a th:text="'共 ' + ${sum} + ' 页'"></a></li>
                                     <li><a th:class="${cur - 1 > 0 ? '' : 'btn disabled'}" th:text="上一页" th:href="@{/success(pn=${cur - 1})}"></a></li>
                                     <li class="disabled"><a th:text="'第 ' + ${cur} + ' 页'"></a></li>
                                     <li><a th:class="${cur + 1 <= sum ? '' : 'btn disabled'}" th:text="下一页" th:href="@{/success(pn=${cur + 1})}"></a></li>
+                                    <li><a id="deleteDiary" class="btn btn-default">删除日记</a></li>
                                 </ul>
+                                <br/>
                             </div>
                             <div class="tab-pane" id="panel-989949">
-                                <form role="form" method="post" th:action="@{/success/write}">
+                                <form role="form" method="post" th:action="@{/success/diary/write}">
                                     <div class="form-group">
                                         <br/>
                                         <label for="content">写日记</label>
@@ -119,6 +127,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-4 column">
                     <div class="list-group">
                         <div class="list-group-item active">用户名</div>
