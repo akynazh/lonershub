@@ -55,7 +55,7 @@ public class VideoController {
                 myType = type.substring(type.indexOf('/') + 1);
             } else {
                 response.addCookie(new Cookie("errorMsg", "video格式错误"));
-                return "redirect:/success";
+                return "success";
             }
             // 获取上传地址
             File relativePath = new File(URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(), "utf-8"));
@@ -69,11 +69,11 @@ public class VideoController {
             } catch (IOException e) {
                 response.addCookie(new Cookie("errorMsg", "video上传失败"));
                 e.printStackTrace();
-                return "redirect:/success";
+                return "success";
             }
         } else {
             response.addCookie(new Cookie("errorMsg", "请选择video"));
-            return "redirect:/success";
+            return "success";
         }
         Video myVideo = new Video();
         myVideo.setVideoUrl(videoUrl);
@@ -83,7 +83,7 @@ public class VideoController {
         myVideo.setStartTime(startTime);
         if (!videoService.save(myVideo)) {
             response.addCookie(new Cookie("errorMsg", "上传失败"));
-            return "redirect:/success";
+            return "success";
         }
         return "redirect:/success";
     }

@@ -1,5 +1,7 @@
 package com.jzh.lonershub.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jzh.lonershub.bean.Diary;
 import com.jzh.lonershub.bean.Loner;
 import com.jzh.lonershub.service.DiaryService;
@@ -41,22 +43,41 @@ public class DiaryController {
         String creatTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         Diary diary = new Diary();
         Loner successLoner = (Loner) session.getAttribute("successLoner");
-        Integer creatorId = successLoner.getLonerId();
-        diary.setCreatorId(creatorId);
+        diary.setCreatorId(successLoner.getLonerId());
         diary.setCreateTime(creatTime);
         diary.setContent(content);
         if (!diaryService.save(diary)) {
             response.addCookie(new Cookie("errorMsg", "保存失败"));
             return "redirect:/success";
         }
+
+        // 重新设置diaryPage对象
+        QueryWrapper<Diary> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("creatorId", successLoner.getLonerId());
+        // 按日期降序排序
+        queryWrapper.orderByDesc("createTime");
+
+        Page<Diary> diaryPage = diaryService.page(new Page<>(1, 6), queryWrapper);
+        session.setAttribute("diaryPage", diaryPage);
         return "redirect:/success";
     }
 
     @PostMapping(value = "/success/diary/delete")
-    public String delete(@RequestParam Integer id, HttpServletResponse response) {
+    public String delete(@RequestParam Integer id, HttpServletResponse response, HttpSession session) {
         if (!diaryService.removeById(id)) {
             response.addCookie(new Cookie("errorMsg", "删除失败"));
+            return "redirect:/success";
         }
+
+        Loner successLoner = (Loner) session.getAttribute("successLoner");
+        // 重新设置diaryPage对象
+        QueryWrapper<Diary> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("creatorId", successLoner.getLonerId());
+        // 按日期降序排序
+        queryWrapper.orderByDesc("createTime");
+
+        Page<Diary> diaryPage = diaryService.page(new Page<>(1, 6), queryWrapper);
+        session.setAttribute("diaryPage", diaryPage);
         return "redirect:/success";
     }
 }

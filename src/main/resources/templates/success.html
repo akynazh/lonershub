@@ -30,8 +30,8 @@
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane active" id="panel-69185">
-                                <ul class="pagination" th:with="cur=${diaryPage.getCurrent()}, sum=${diaryPage.getPages()},
-                                        diaries=${diaryPage.getRecords()}">
+                                <ul class="pagination" th:with="cur=${session.diaryPage.getCurrent()}, sum=${session.diaryPage.getPages()},
+                                        diaries=${session.diaryPage.getRecords()}">
                                     <div th:each="diary:${diaries}">
                                         <blockquote>
                                             <p th:text="${diary.getContent()}"></p>
