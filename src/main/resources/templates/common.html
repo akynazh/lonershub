@@ -47,7 +47,7 @@
     </div>
 
 </nav>
-<div th:fragment="common_header" class="jumbotron">
+<div th:fragment="common_header" class="jumbotron" style="background-image: linear-gradient(to bottom, black, white)">
     <h1>
         Welcome To LonersHub!
     </h1>
@@ -55,14 +55,14 @@
         If you feel lonely, just come here, seek fun and share emotion with other loners!
     </p>
     <p>
-        <a class="btn btn-primary btn-large" th:href="@{/login}">登录</a>
-        <a class="btn btn-primary btn-large" th:href="@{/register}">注册</a>
+        <a class="btn btn-primary btn-large" style="background: gray; border: gray" th:href="@{/login}">登录</a>
+        <a class="btn btn-primary btn-large" style="background: black; border: black" th:href="@{/register}">注册</a>
     </p>
     <p>
 
     </p>
 </div>
-<div th:fragment="common_slider" class="carousel slide" id="carousel-810691">
+<div th:fragment="common_slider" class="carousel slide" id="carousel-810691" style="border-radius: 25px">
     <ol class="carousel-indicators">
         <li class="active" data-slide-to="0" data-target="#carousel-810691">
         </li>
@@ -76,33 +76,24 @@
             <img alt="slide1" th:src="@{/slide/slide1.jpg}"/>
             <div class="carousel-caption">
                 <h4>
-                    学会接纳孤独并享受孤独。
+                    把孤独当成一种生活态度。
                 </h4>
-                <p>
-                    不要把孤独和不合群当成一种病，把它当成一种生活的态度。
-                </p>
             </div>
         </div>
         <div class="item">
             <img alt="slide2" th:src="@{/slide/slide2.jpg}"/>
             <div class="carousel-caption">
                 <h4>
-                    一起约定一个时间看电影吧。
+                    一起约个时间看电影吧。
                 </h4>
-                <p>
-                    不想一个人看电影吗，不想去外面的电影院看电影吗，和志同道合的朋友约个时间一起看电影吧！
-                </p>
             </div>
         </div>
         <div class="item">
             <img alt="slide3" th:src="@{/slide/slide3.jpg}"/>
             <div class="carousel-caption">
                 <h4>
-                    在网络世界中抒发你压抑着的情感。
+                    抒发你压抑着的情感吧。
                 </h4>
-                <p>
-                    也许你正经历一段很难的日子，也许你的感情无处安放，到这里来吧，和朋友们抒发你的情感吧！
-                </p>
             </div>
         </div>
     </div>
@@ -111,6 +102,23 @@
                                                                     href="#carousel-810691"
                                                                     data-slide="next"><span
         class="glyphicon glyphicon-chevron-right"></span></a>
+</div>
+<div th:fragment="common_desc" class="col-md-4 column">
+    <div class="list-group">
+        <div class="list-group-item active" style="background: gray; border: gray;
+                        text-align: center; border-radius: 20px 20px 0 0">用户名</div>
+        <div class="list-group-item">
+            <h3 style="color: black; font-style: italic; text-align: center; font-weight: bold"
+                th:text="${session.successLoner.getLonerName()}"></h3>
+        </div>
+        <img class="img-responsive" alt="140x140" th:src="${session.successLoner.getLonerAvatarUrl()}"/>
+        <div class="list-group-item">
+            <h3 style="color: black; text-align: center; font-style: italic"
+                th:text="${session.successLoner.getLonerSignature()}"></h3>
+        </div>
+        <div class="list-group-item active" style="background: gray; border: gray;
+                        text-align: center; border-radius: 0 0 20px 20px">个性签名</div>
+    </div>
 </div>
 
 <div th:fragment="common_script">

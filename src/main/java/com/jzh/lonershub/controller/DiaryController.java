@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
@@ -36,7 +38,8 @@ public class DiaryController {
     }
 
     @PostMapping(value = "/success/diary/write")
-    public String write(@RequestParam String content, HttpSession session, HttpServletResponse response) throws IOException {
+    public String write(@RequestParam String content, HttpSession session,
+                        HttpServletResponse response, HttpServletRequest request) throws Exception {
         if (!StringUtils.hasText(content)) {
             content = "无话可说...";
         }
@@ -48,7 +51,8 @@ public class DiaryController {
         diary.setContent(content);
         if (!diaryService.save(diary)) {
             response.addCookie(new Cookie("errorMsg", "保存失败"));
-            return "redirect:/success";
+            request.getRequestDispatcher("/success").forward(request, response);
+            return null;
         }
 
         // 重新设置diaryPage对象
@@ -57,16 +61,18 @@ public class DiaryController {
         // 按日期降序排序
         queryWrapper.orderByDesc("createTime");
 
-        Page<Diary> diaryPage = diaryService.page(new Page<>(1, 6), queryWrapper);
+        Page<Diary> diaryPage = diaryService.page(new Page<>(1, 4), queryWrapper);
         session.setAttribute("diaryPage", diaryPage);
         return "redirect:/success";
     }
 
     @PostMapping(value = "/success/diary/delete")
-    public String delete(@RequestParam Integer id, HttpServletResponse response, HttpSession session) {
+    public String delete(@RequestParam Integer id, HttpServletResponse response,
+                         HttpSession session, HttpServletRequest request) throws ServletException, IOException {
         if (!diaryService.removeById(id)) {
             response.addCookie(new Cookie("errorMsg", "删除失败"));
-            return "redirect:/success";
+            request.getRequestDispatcher("/success").forward(request, response);
+            return null;
         }
 
         Loner successLoner = (Loner) session.getAttribute("successLoner");
@@ -76,7 +82,7 @@ public class DiaryController {
         // 按日期降序排序
         queryWrapper.orderByDesc("createTime");
 
-        Page<Diary> diaryPage = diaryService.page(new Page<>(1, 6), queryWrapper);
+        Page<Diary> diaryPage = diaryService.page(new Page<>(1, 4), queryWrapper);
         session.setAttribute("diaryPage", diaryPage);
         return "redirect:/success";
     }

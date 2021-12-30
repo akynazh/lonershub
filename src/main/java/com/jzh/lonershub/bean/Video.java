@@ -19,5 +19,7 @@ public class Video {
     @TableId(value = "videoId", type = IdType.AUTO)
     private Integer videoId;
     private String videoUrl;
+    private String videoName;
     private String description;
+    private Integer participantsNum;
 }

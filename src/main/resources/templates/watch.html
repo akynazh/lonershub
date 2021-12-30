@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Watch</title>
+    <div th:replace="common :: common_css"></div>
+</head>
+<body style="background: black">
+<div class="container">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <nav th:replace="common :: common_nav"></nav>
+            <div class="embed-responsive embed-responsive-16by9">
+                <video width="320" height="240" controls>
+                    <source type="video/mp4" th:src="${video.getVideoUrl()}">
+                </video>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="common :: common_script"></div>
+</body>
+</html>

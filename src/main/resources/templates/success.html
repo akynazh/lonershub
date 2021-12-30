@@ -5,13 +5,12 @@
     <title>Space</title>
     <div th:replace="common :: common_css"></div>
 </head>
-<body>
+<body style="background-image: linear-gradient(to right, black, white)">
 <div class="container">
     <div class="row clearfix">
         <div class="col-md-12 column">
             <nav th:replace="common :: common_nav"></nav>
             <div class="row clearfix">
-
                 <div class="col-md-8 column">
                     <div class="tabbable" id="tabs-350492">
                         <ul class="nav nav-tabs">
@@ -30,119 +29,128 @@
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane active" id="panel-69185">
-                                <ul class="pagination" th:with="cur=${session.diaryPage.getCurrent()}, sum=${session.diaryPage.getPages()},
+                                <div class="jumbotron" style="color:white; background-image: linear-gradient(to right, gray, black); border-radius: 0 0 25px 25px">
+                                    <ul class="pagination" th:with="cur=${session.diaryPage.getCurrent()}, sum=${session.diaryPage.getPages()},
                                         diaries=${session.diaryPage.getRecords()}">
-                                    <div th:each="diary:${diaries}">
-                                        <blockquote>
-                                            <p th:text="${diary.getContent()}"></p>
-                                            <small th:text="${diary.getCreateTime()}"></small>
-                                            <div class="deleteDiv" style="display: none">
-                                                <form th:action="@{/success/diary/delete(id=${diary.getDiaryId()})}" method="post">
-                                                    <input type="submit" value="删除" class="btn btn-default"/>
-                                                </form>
+                                        <div th:each="diary:${diaries}">
+                                            <div class="panel panel-default" style="background-image: linear-gradient(to right, gray, black); border-radius: 20px">
+                                                <div class="panel-heading" style="border-radius: 20px 20px 0 0">
+                                                    <h3 class="panel-title" th:text="${diary.getCreateTime()}"></h3>
+                                                </div>
+                                                <div class="panel-body" style="background-image: linear-gradient(to right, gray, black); border-radius: 20px">
+                                                    <div th:text="${diary.getContent()}" style="clear: both; width: auto; word-break: break-all"></div>
+                                                </div>
+                                                <div class="deleteDiv" style="display: none">
+                                                    <form th:action="@{/success/diary/delete(id=${diary.getDiaryId()})}" method="post">
+                                                        <input type="submit" value="删除" class="btn btn-default"/>
+                                                    </form>
+                                                </div>
                                             </div>
-                                        </blockquote>
-                                    </div>
-                                    <li class="disabled"><a th:text="'共 ' + ${sum} + ' 页'"></a></li>
-                                    <li><a th:class="${cur - 1 > 0 ? '' : 'btn disabled'}" th:text="上一页" th:href="@{/success(pn=${cur - 1})}"></a></li>
-                                    <li class="disabled"><a th:text="'第 ' + ${cur} + ' 页'"></a></li>
-                                    <li><a th:class="${cur + 1 <= sum ? '' : 'btn disabled'}" th:text="下一页" th:href="@{/success(pn=${cur + 1})}"></a></li>
-                                    <li><a id="deleteDiary" class="btn btn-default">删除日记</a></li>
-                                </ul>
-                                <br/>
+                                        </div>
+                                        <li class="disabled"><a th:text="'共 ' + ${sum} + ' 页'"></a></li>
+                                        <li><a th:class="${cur - 1 > 0 ? '' : 'btn disabled'}" th:text="上一页" th:href="@{/success(pn=${cur - 1})}"></a></li>
+                                        <li class="disabled"><a th:text="'第 ' + ${cur} + ' 页'"></a></li>
+                                        <li><a th:class="${cur + 1 <= sum ? '' : 'btn disabled'}" th:text="下一页" th:href="@{/success(pn=${cur + 1})}"></a></li>
+                                        <li><a id="deleteDiary" class="btn btn-default">删除日记</a></li>
+                                    </ul>
+                                </div>
                             </div>
                             <div class="tab-pane" id="panel-989949">
-                                <form role="form" method="post" th:action="@{/success/diary/write}">
-                                    <div class="form-group">
-                                        <br/>
-                                        <label for="content">写日记</label>
-                                        <br/><textarea name="content"
-                                                       id="content" rows="20" cols="100"></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-default">写好了</button>
-                                </form>
+                                <div class="jumbotron" style="color:white; background-image: linear-gradient(to right, gray, black); border-radius: 0 0 25px 25px">
+                                    <h2>White Your Things Here</h2>
+                                    <p>Express your feels by writing something</p>
+                                    <form role="form" method="post" th:action="@{/success/diary/write}">
+                                        <div class="form-group">
+                                            <br/><textarea name="content"
+                                                           class="form-control"
+                                                           id="content" rows="10"
+                                                           style="font-size: 25px; color: white; background-image: linear-gradient(to right, gray, black);"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-default">FINISH</button>
+                                    </form>
+                                </div>
                             </div>
                             <div class="tab-pane" id="panel-658766">
-                                <form role="form" method="post" th:action="@{/success/upload}"
-                                      enctype="multipart/form-data">
-                                    <div class="form-group">
-                                        <label for="startTime">预约时间</label>
-                                        <input type="datetime-local" name="startTime" class="form-control"
-                                               id="startTime">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="description">video介绍</label>
-                                        <input type="text" name="description" class="form-control" id="description">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="video">选择video</label>
-                                        <input type="file" name="video" id="video">
-                                    </div>
-                                    <button type="submit" class="btn btn-default">选好啦</button>
-                                </form>
+                                <div class="jumbotron" style="color:white; background-image: linear-gradient(to right, gray, black); border-radius: 0 0 25px 25px">
+                                    <h2>Choose A Video And Set A Time</h2>
+                                    <p>Enjoy your time with other loners</p>
+                                    <form role="form" method="post" th:action="@{/success/upload}"
+                                          enctype="multipart/form-data">
+                                        <div class="form-group">
+                                            <br/>
+                                            <label for="startTime">预约时间</label>
+                                            <input type="datetime-local" name="startTime" class="form-control"
+                                                   id="startTime">
+                                        </div>
+                                        <div class="form-group">
+                                            <br/>
+                                            <label for="videoName">video名称</label>
+                                            <input type="text" name="videoName" class="form-control" id="videoName">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="description">video介绍</label>
+                                            <input type="text" name="description" class="form-control" id="description">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="video">选择video</label>
+                                            <input type="file" name="video" id="video">
+                                        </div>
+                                        <button type="submit" class="btn btn-default">选好啦</button>
+                                    </form>
+                                </div>
                             </div>
                             <div class="tab-pane" id="panel-123456">
-                                <form role="form" method="post" th:action="@{/success/modify}" enctype="multipart/form-data">
-                                    <div class="form-group">
-                                        <label for="lonerName">用户名</label><input name="lonerName"
-                                                                                 th:value="${session.successLoner.getLonerName()}"
-                                                                                 type="text"
-                                                                                 class="form-control"
-                                                                                 id="lonerName"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="lonerPassword">密码</label><input name="lonerPassword"
-                                                                                    th:value="${session.successLoner.getLonerPassword()}"
-                                                                                    placeholder="不大于32位"
-                                                                                    type="password"
-                                                                                    class="form-control"
-                                                                                    id="lonerPassword"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="lonerEmail">邮箱</label><input type="email"
-                                                                                 th:value="${session.successLoner.getLonerEmail()}"
-                                                                                 name="lonerEmail"
-                                                                                 class="form-control"
-                                                                                 id="lonerEmail"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="lonerSignature">个性签名</label><input
-                                            placeholder="不多于30个字段" type="text"
-                                            th:value="${session.successLoner.getLonerSignature()}"
-                                            name="lonerSignature"
-                                            class="form-control"
-                                            id="lonerSignature"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="lonerAvatar">上传头像</label><input name="lonerAvatar"
-                                                                                    type="file"
-                                                                                    id="lonerAvatar"/>
-                                        <p class="help-block">
+                                <div class="jumbotron" style="color:white; background-image: linear-gradient(to right, gray, black); border-radius: 0 0 25px 25px">
+                                    <h2>Change Yourself</h2>
+                                    <form role="form" method="post" th:action="@{/success/modify}" enctype="multipart/form-data">
+                                        <div class="form-group">
+                                            <br/>
+                                            <label for="lonerName">用户名</label><input name="lonerName"
+                                                                                     th:value="${session.successLoner.getLonerName()}"
+                                                                                     type="text"
+                                                                                     class="form-control"
+                                                                                     id="lonerName"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="lonerPassword">密码</label><input name="lonerPassword"
+                                                                                        th:value="${session.successLoner.getLonerPassword()}"
+                                                                                        placeholder="不大于32位"
+                                                                                        type="password"
+                                                                                        class="form-control"
+                                                                                        id="lonerPassword"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="lonerEmail">邮箱</label><input type="email"
+                                                                                     th:value="${session.successLoner.getLonerEmail()}"
+                                                                                     name="lonerEmail"
+                                                                                     class="form-control"
+                                                                                     id="lonerEmail"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="lonerSignature">个性签名</label><input
+                                                placeholder="不多于30个字段" type="text"
+                                                th:value="${session.successLoner.getLonerSignature()}"
+                                                name="lonerSignature"
+                                                class="form-control"
+                                                id="lonerSignature"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="lonerAvatar">上传头像</label><input name="lonerAvatar"
+                                                                                        type="file"
+                                                                                        id="lonerAvatar"/>
+                                            <p class="help-block">
 
-                                        </p>
-                                    </div>
-                                    <button type="submit" class="btn btn-default">保存</button>
-                                </form>
+                                            </p>
+                                        </div>
+                                        <button type="submit" class="btn btn-default">保存</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-4 column">
-                    <div class="list-group">
-                        <div class="list-group-item active">用户名</div>
-                        <div class="list-group-item">
-                            <h3 style="color: darkred; font-weight: bold"
-                                th:text="${session.successLoner.getLonerName()}"></h3>
-                        </div>
-                        <img class="img-responsive" alt="140x140" th:src="${session.successLoner.getLonerAvatarUrl()}"/>
-                        <div class="list-group-item">
-                            <h3 style="color: darkgreen; font-weight: bold"
-                                th:text="${session.successLoner.getLonerSignature()}"></h3>
-                        </div>
-                        <div class="list-group-item active" style="background: green">个性签名</div>
-                    </div>
-                </div>
+                <div th:replace="common :: common_desc"></div>
             </div>
         </div>
     </div>

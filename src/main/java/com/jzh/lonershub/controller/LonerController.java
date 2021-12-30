@@ -82,7 +82,8 @@ public class LonerController {
      * @date 2021/12/28 14:55
      */
     @PostMapping(value = "/register")
-    public String register(@Valid LonerForm lonerForm, BindingResult br, HttpSession session, HttpServletResponse response) throws IOException {
+    public String register(@Valid LonerForm lonerForm, BindingResult br,
+                           HttpSession session, HttpServletResponse response, HttpServletRequest request) throws IOException {
 
         // 判断表单是否填写有误
         if (br.hasErrors()) {
@@ -160,7 +161,7 @@ public class LonerController {
     public String login(@RequestParam String lonerEmail,
                         @RequestParam String lonerPassword,
                         HttpSession session,
-                        HttpServletResponse response) {
+                        HttpServletResponse response, HttpServletRequest request) {
 
         QueryWrapper<Loner> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("lonerEmail", lonerEmail);
@@ -191,11 +192,10 @@ public class LonerController {
      * @date 2021/12/28 14:56
      */
     @GetMapping(value = {"/success"})
-    public String success(@RequestParam(defaultValue = "1") Integer pn,  HttpSession session, Model model) {
-        // 如果不是第一次访问则直接返回页面
-        if (session.getAttribute("diaryPage") != null) {
-            return "success";
-        }
+    public String success(@RequestParam(defaultValue = "1") Integer pn,
+                          HttpSession session, Model model, HttpServletRequest request) {
+        // 如果不是第一次加入到success页面且pn=1则直接返回无需多次操作数据库，在其他会修改diaryPage的地方修改对应session对象即可
+        if (session.getAttribute("diaryPage") != null && pn == 1) return "success";
         // 获取当前Loner的ID
         Loner successLoner = (Loner) session.getAttribute("successLoner");
         Integer lonerId = successLoner.getLonerId();
@@ -204,7 +204,7 @@ public class LonerController {
         // 按日期降序排序
         queryWrapper.orderByDesc("createTime");
 
-        Page<Diary> diaryPage = diaryService.page(new Page<>(pn, 6), queryWrapper);
+        Page<Diary> diaryPage = diaryService.page(new Page<>(pn, 4), queryWrapper);
         session.setAttribute("diaryPage", diaryPage);
         return "success";
     }
@@ -216,7 +216,8 @@ public class LonerController {
      */
     @PostMapping(value = "/success/modify")
     public String modify(@Valid LonerForm lonerForm, BindingResult br,
-                         HttpSession session, HttpServletResponse response) throws IOException {
+                         HttpSession session, HttpServletResponse response,
+                         HttpServletRequest request) throws IOException, ServletException {
         Loner successLoner = (Loner) session.getAttribute("successLoner");
         UpdateWrapper<Loner> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("lonerId", successLoner.getLonerId());
@@ -230,7 +231,8 @@ public class LonerController {
             }
             Cookie cookie = new Cookie("errorMsg", errorMsg.toString());
             response.addCookie(cookie);
-            return "success";
+            request.getRequestDispatcher("/success").forward(request, response);
+            return null;
         }
 
         MultipartFile lonerAvatar = lonerForm.getLonerAvatar();
@@ -243,7 +245,8 @@ public class LonerController {
                 myType = type.substring(type.indexOf('/') + 1);
             } else {
                 response.addCookie(new Cookie("errorMsg", "图片格式错误"));
-                return "success";
+                request.getRequestDispatcher("/success").forward(request, response);
+                return null;
             }
             // 获取上传地址
             File relativePath = new File(URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(), "utf-8"));
@@ -259,7 +262,8 @@ public class LonerController {
             } catch (IOException e) {
                 response.addCookie(new Cookie("errorMsg", "图片上传失败"));
                 e.printStackTrace();
-                return "success";
+                request.getRequestDispatcher("/success").forward(request, response);
+                return null;
             }
         }
 
@@ -271,7 +275,8 @@ public class LonerController {
             Loner one = lonerService.getOne(queryWrapper);
             if (one != null) {
                 response.addCookie(new Cookie("errorMsg", "邮箱已经被注册"));
-                return "success";
+                request.getRequestDispatcher("/success").forward(request, response);
+                return null;
             } else {
                 updateWrapper.set("lonerEmail", lonerForm.getLonerEmail());
                 flag = true;
@@ -304,7 +309,8 @@ public class LonerController {
                 session.setAttribute("successLoner", newLoner);
             } else {
                 response.addCookie(new Cookie("errorMsg", "保存失败"));
-                return "success";
+                request.getRequestDispatcher("/success").forward(request, response);
+                return null;
             }
         }
         return "redirect:/success";

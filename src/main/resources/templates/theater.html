@@ -5,11 +5,58 @@
     <title>Theater</title>
     <div th:replace="common :: common_css"></div>
 </head>
-<body>
+<body style="background: black">
 <div class="container">
     <div class="row clearfix">
         <div class="col-md-12 column">
             <nav th:replace="common :: common_nav"></nav>
+            <div class="embed-responsive embed-responsive-16by9">
+                <video width="320" height="240" controls>
+                    <source type="video/mp4" th:src="@{/video/default.mp4}">
+                </video>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>
+                        影片名称
+                    </th>
+                    <th>
+                        影片描述
+                    </th>
+                    <th>
+                        开始时间
+                    </th>
+                    <th>
+                        预约人数
+                    </th>
+                    <th>
+                        查看影片
+                    </th>
+                </tr>
+                </thead>
+                <tbody th:each="video, i:${session.videoList}">
+                <tr>
+                    <td th:text="${video.getVideoName()}">
+                    </td>
+                    <td th:text="${video.getDescription()}">
+                    </td>
+                    <td th:text="${video.getStartTime()}">
+                    </td>
+                    <td th:text="${video.getParticipantsNum()}">
+                    </td>
+                    <td>
+                        <a th:href="@{/theater/watch/(videoId=${video.getVideoId()})}">开始观看</a>
+                    </td>
+                    <td>
+                        <a th:href="@{/theater/reserve/(videoId=${video.getVideoId()})}">我要预约</a>
+                    </td>
+                    <td>
+                        <a th:href="@{/theater/delete/(videoId=${video.getVideoId()})}">取消影片</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

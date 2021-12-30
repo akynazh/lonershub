@@ -23,12 +23,15 @@ CREATE TABLE t_video (
                          publisherId INT,
                          videoId INT PRIMARY KEY AUTO_INCREMENT,
                          videoUrl TEXT,
+                         videoName varchar(255),
                          description TEXT,
+                         participantsNum INT,
                          FOREIGN KEY (publisherId) REFERENCES t_loner(lonerId)
 );
 DROP TABLE IF EXISTS t_participant;
 CREATE TABLE t_participant (
-                               videoId INT PRIMARY KEY AUTO_INCREMENT,
+                               id INT PRIMARY KEY AUTO_INCREMENT,
+                               videoId INT,
                                participantId INT,
                                FOREIGN KEY (participantId) REFERENCES t_loner(lonerId),
                                FOREIGN KEY (videoId) REFERENCES t_video(videoId)
