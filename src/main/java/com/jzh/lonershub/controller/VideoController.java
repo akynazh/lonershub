@@ -9,6 +9,8 @@ import com.jzh.lonershub.service.ParticipantService;
 import com.jzh.lonershub.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.ui.Model;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
@@ -199,14 +201,21 @@ public class VideoController {
     }
 
     @GetMapping(value = "/theater/delete")
+    @Transactional
     public String delete(@RequestParam Integer videoId, HttpServletResponse response,
                          HttpSession session, HttpServletRequest request) throws ServletException, IOException {
         Loner successLoner = (Loner) session.getAttribute("successLoner");
         if (successLoner.getLonerId() == 1) {
-            if (videoService.removeById(videoId)) {
+            try {
+                QueryWrapper<Participant> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("videoId", videoId);
+                participantService.remove(queryWrapper);
+                videoService.removeById(videoId);
+            } catch (Exception e) {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 response.addCookie(new Cookie("errorMsg", "删除失败"));
                 request.getRequestDispatcher("/theater").forward(request, response);
-                return null;
+                e.printStackTrace();
             }
         } else {
             response.addCookie(new Cookie("errorMsg", "没有权限"));
