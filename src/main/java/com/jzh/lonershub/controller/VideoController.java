@@ -3,8 +3,10 @@ package com.jzh.lonershub.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.jzh.lonershub.bean.Loner;
+import com.jzh.lonershub.bean.Message;
 import com.jzh.lonershub.bean.Participant;
 import com.jzh.lonershub.bean.Video;
+import com.jzh.lonershub.service.MessageService;
 import com.jzh.lonershub.service.ParticipantService;
 import com.jzh.lonershub.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,6 +34,7 @@ import java.util.*;
 public class VideoController {
     private VideoService videoService;
     private ParticipantService participantService;
+    private MessageService messageService;
 
     @Autowired
     public void setVideoService(VideoService videoService) {
@@ -45,12 +46,18 @@ public class VideoController {
         this.participantService = participantService;
     }
 
+    @Autowired
+    public void setMessageService(MessageService messageService) {
+        this.messageService = messageService;
+    }
+
     /**
      * @description: 上传video
      * @author Jiang Zhihang
      * @date 2021/12/30 23:43
      */
     @PostMapping("/success/upload")
+    @Transactional
     public String uploadVideo(@RequestParam String startTime, @RequestPart MultipartFile video,
                               @RequestParam String description, @RequestParam String videoName, HttpSession session,
                               HttpServletResponse response, HttpServletRequest request) throws IOException, ServletException {
@@ -99,14 +106,18 @@ public class VideoController {
         myVideo.setVideoName(videoName);
         myVideo.setParticipantsNum(1);
         Participant participant = new Participant();
-        if (!videoService.save(myVideo)) {
+        participant.setVideoId(myVideo.getVideoId());
+        participant.setParticipantId(successLoner.getLonerId());
+
+        try {
+            videoService.save(myVideo);
+            participantService.save(participant);
+        } catch (Exception e) {
+            e.printStackTrace();
             response.addCookie(new Cookie("errorMsg", "上传失败"));
             request.getRequestDispatcher("/success").forward(request, response);
             return null;
         }
-        participant.setVideoId(myVideo.getVideoId());
-        participant.setParticipantId(successLoner.getLonerId());
-        participantService.save(participant);
         return "redirect:/success";
     }
 
@@ -119,13 +130,16 @@ public class VideoController {
     public String theater(HttpSession session) {
         List<Video> list = videoService.list();
         List<Video> videoList = new ArrayList<>();
-        // 只取出未来五天的预约影片
+        // 只取出未来五天和过去五天的预约影片
         Calendar calendar = Calendar.getInstance();
+        Calendar calendar1 = Calendar.getInstance();
         calendar.add(Calendar.DATE, 5);
+        calendar1.add(Calendar.DATE, -5);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String myTime = sdf.format(calendar.getTime());
+        String myTime1 = sdf.format(calendar1.getTime());
         for (Video video : list) {
-            if (video.getStartTime().compareTo(myTime) < 0) {
+            if (video.getStartTime().compareTo(myTime) < 0 && video.getStartTime().compareTo(myTime1) > 0) {
                 videoList.add(video);
             }
         }
@@ -139,6 +153,7 @@ public class VideoController {
      * @date 2021/12/30 23:43
      */
     @GetMapping(value = "/theater/reserve")
+    @Transactional
     public String reserve(@RequestParam Integer videoId, HttpSession session,
                           HttpServletResponse response, HttpServletRequest request) throws ServletException, IOException {
         Loner successLoner = (Loner) session.getAttribute("successLoner");
@@ -161,14 +176,14 @@ public class VideoController {
         updateWrapper.eq("videoId", videoId);
         updateWrapper.set("participantsNum", myVideo.getParticipantsNum() + 1);
 
-        // 开启事务！！！！！！！！！！！
-
-
-
-
-        if (!participantService.save(participant) || !videoService.update(updateWrapper)) {
+        try {
+            participantService.save(participant);
+            videoService.update(updateWrapper);
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             response.addCookie(new Cookie("errorMsg", "预约失败"));
             request.getRequestDispatcher("/theater").forward(request, response);
+            e.printStackTrace();
             return null;
         }
         return "redirect:/theater";
@@ -190,8 +205,13 @@ public class VideoController {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date videoDate = sdf.parse(video.getStartTime());
         Date now = new Date();
+        QueryWrapper<Message> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("videoId", videoId);
+        List<Message> messageList = messageService.list(queryWrapper);
+        System.out.println(messageList);
         if (now.compareTo(videoDate) > 0) {
             model.addAttribute("video", video);
+            model.addAttribute("messageList", messageList);
             return "watch";
         } else {
             response.addCookie(new Cookie("errorMsg", "该影片还未到播放时间"));
@@ -216,6 +236,7 @@ public class VideoController {
                 response.addCookie(new Cookie("errorMsg", "删除失败"));
                 request.getRequestDispatcher("/theater").forward(request, response);
                 e.printStackTrace();
+                return null;
             }
         } else {
             response.addCookie(new Cookie("errorMsg", "没有权限"));
@@ -223,5 +244,22 @@ public class VideoController {
             return null;
         }
         return "redirect:/theater";
+    }
+
+    @PostMapping(value = "/theater/watch/comment")
+    @ResponseBody
+    public String comment(HttpSession session, @RequestBody Map<String, String> jsonData) {
+        // @PathVariable 和 @RequestParam 只支持get请求
+        Loner loner = (Loner)session.getAttribute("successLoner");
+        Message message = new Message();
+        String content = jsonData.get("content");
+        Integer videoId = Integer.valueOf(jsonData.get("videoId"));
+        message.setCreatorId(loner.getLonerId());
+        message.setVideoId(videoId);
+        message.setContent(content);
+        if (!messageService.save(message)) {
+            return "0";
+        }
+        return "1";
     }
 }

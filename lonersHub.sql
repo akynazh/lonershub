@@ -40,8 +40,10 @@ DROP TABLE IF EXISTS t_message;
 CREATE TABLE t_message (
                            messageId INT PRIMARY KEY AUTO_INCREMENT,
                            creatorId INT,
+                           videoId INT,
                            content TEXT,
-                           FOREIGN KEY (creatorId) REFERENCES t_loner(lonerId)
+                           FOREIGN KEY (creatorId) REFERENCES t_loner(lonerId),
+                           FOREIGN KEY (videoId) REFERENCES t_video(videoId)
 );
 
 ALTER DATABASE lonersHub DEFAULT CHARACTER SET utf8;

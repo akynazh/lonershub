@@ -17,5 +17,6 @@ public class Message {
     @TableId(value = "messageId", type = IdType.AUTO)
     private Integer messageId;
     private Integer creatorId;
+    private Integer videoId;
     private String content;
 }

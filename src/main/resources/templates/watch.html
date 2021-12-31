@@ -15,6 +15,13 @@
                     <source type="video/mp4" th:src="${video.getVideoUrl()}">
                 </video>
             </div>
+            <input id="videoId" th:value="${video.getVideoId()}" style="display: none">
+            <input id="message-content" type="text" placeholder="写下你的评论吧...."
+                   style="background: black; color: white; width: 90%; border-radius: 10px; font-size: 15px">
+            <button type="submit" id="message-submit" style="background: black; color: white; border-radius: 5px; font-size: 10px; width: 7%">SEND</button>
+            <div th:each="message:${messageList}" id="messageList">
+                <p th:text="${message}" style="color: white"></p>
+            </div>
         </div>
     </div>
 </div>
