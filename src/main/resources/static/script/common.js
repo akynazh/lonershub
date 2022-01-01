@@ -25,11 +25,16 @@ $(document).ready(function () {
             }),
             dataType: 'json',
             success:function (res) {
-                if (res === "0") alert("fail");
+                if (res['success'] === "0") $('.alert').html('fail').addClass('alert-info').show().delay(1500).fadeOut();
                 else {
-
+                    $("<li class=\"list-group-item\" style=\"background: black; color: white;\">"
+                        + "#" + res['time'] + "#&nbsp[" + res['name'] + "]:&nbsp&nbsp" +  content  + "</li>").insertAfter('#newComment');
+                    $('.alert').html('success').addClass('alert-info').show().delay(1000).fadeOut();
                 }
             }
         })
+    })
+    $('#message-load').click(function () {
+        $('#more-messageList').css("display", "block");
     })
 })

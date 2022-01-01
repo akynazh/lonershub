@@ -105,12 +105,12 @@ public class VideoController {
         myVideo.setStartTime(startTime);
         myVideo.setVideoName(videoName);
         myVideo.setParticipantsNum(1);
-        Participant participant = new Participant();
-        participant.setVideoId(myVideo.getVideoId());
-        participant.setParticipantId(successLoner.getLonerId());
 
         try {
             videoService.save(myVideo);
+            Participant participant = new Participant();
+            participant.setVideoId(myVideo.getVideoId());
+            participant.setParticipantId(successLoner.getLonerId());
             participantService.save(participant);
         } catch (Exception e) {
             e.printStackTrace();
@@ -207,11 +207,17 @@ public class VideoController {
         Date now = new Date();
         QueryWrapper<Message> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("videoId", videoId);
-        List<Message> messageList = messageService.list(queryWrapper);
-        System.out.println(messageList);
+        List<Message> originMessageList = messageService.list(queryWrapper);
+        List<Message> messageList = originMessageList;
+        List<Message> moreMessageList = new ArrayList<>();
+        if (originMessageList.size() > 10) {
+            messageList = originMessageList.subList(0, 10);
+            moreMessageList = originMessageList.subList(10, originMessageList.size());
+        }
         if (now.compareTo(videoDate) > 0) {
             model.addAttribute("video", video);
             model.addAttribute("messageList", messageList);
+            model.addAttribute("moreMessageList", moreMessageList);
             return "watch";
         } else {
             response.addCookie(new Cookie("errorMsg", "该影片还未到播放时间"));
@@ -248,7 +254,7 @@ public class VideoController {
 
     @PostMapping(value = "/theater/watch/comment")
     @ResponseBody
-    public String comment(HttpSession session, @RequestBody Map<String, String> jsonData) {
+    public Map<String, String> comment(HttpSession session, @RequestBody Map<String, String> jsonData) {
         // @PathVariable 和 @RequestParam 只支持get请求
         Loner loner = (Loner)session.getAttribute("successLoner");
         Message message = new Message();
@@ -257,9 +263,18 @@ public class VideoController {
         message.setCreatorId(loner.getLonerId());
         message.setVideoId(videoId);
         message.setContent(content);
+        message.setCreatorName(loner.getLonerName());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String createTime = sdf.format(new Date());
+        message.setCreateTime(createTime);
+        Map<String, String> myMsg = new HashMap<>();
+        myMsg.put("name", loner.getLonerName());
+        myMsg.put("time", message.getCreateTime());
         if (!messageService.save(message)) {
-            return "0";
+            myMsg.put("success", "0");
+            return myMsg;
         }
-        return "1";
+        myMsg.put("success", "1");
+        return myMsg;
     }
 }

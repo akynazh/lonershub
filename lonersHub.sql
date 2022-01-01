@@ -40,6 +40,8 @@ DROP TABLE IF EXISTS t_message;
 CREATE TABLE t_message (
                            messageId INT PRIMARY KEY AUTO_INCREMENT,
                            creatorId INT,
+                           creatorName VARCHAR(32),
+                           createTime VARCHAR(64),
                            videoId INT,
                            content TEXT,
                            FOREIGN KEY (creatorId) REFERENCES t_loner(lonerId),
