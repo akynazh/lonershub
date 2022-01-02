@@ -1,9 +1,24 @@
 spring:
+  resources:
+    static-locations:
+    - classpath:static/
+#    - file:D://@Akyna/Photo/static/  # 外部路径
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 658766
     url: jdbc:mysql://localhost:3306/lonersHub?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
+  application:
+    name: LonersHub
+  servlet:
+    multipart:
+      max-file-size: 2GB
+      max-request-size: 64GB
+
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
+
+server:
+  port: 8080
+

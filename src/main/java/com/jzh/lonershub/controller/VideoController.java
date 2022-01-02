@@ -9,6 +9,7 @@ import com.jzh.lonershub.bean.Video;
 import com.jzh.lonershub.service.MessageService;
 import com.jzh.lonershub.service.ParticipantService;
 import com.jzh.lonershub.service.VideoService;
+import com.jzh.lonershub.util.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,23 +69,23 @@ public class VideoController {
         // 处理视频上传
         if (video.getSize() > 0) {
             // 获取video类型
-            String type = video.getContentType();
-            String myType;
-            if (type != null) {
-                myType = type.substring(type.indexOf('/') + 1);
-            } else {
+            String fileType = FileUtils.getFileType(video);
+            if (fileType == null) {
                 response.addCookie(new Cookie("errorMsg", "video格式错误"));
                 request.getRequestDispatcher("/success").forward(request, response);
                 return null;
             }
-            // 获取上传地址
-            File relativePath = new File(URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(), "utf-8"));
-            File path = relativePath.getAbsoluteFile(); // 获取路径为： ${project}/target/classes/ 或者 ${jar包}/
-            String fileName = System.currentTimeMillis() + "." + myType;
-            File uploadPath = new File(path, "/static/video/" + fileName);
-            if (!uploadPath.exists()) uploadPath.mkdirs();
+
+            // 设置文件名
+            String fileName = System.currentTimeMillis() + "." + fileType;
+
+            // 获取上传路径
+            String uploadPath = FileUtils.getUploadPath("video", fileName);
+
+            File uploadPathFile = new File(uploadPath);
+            if (!uploadPathFile.exists()) uploadPathFile.mkdirs();
             try {
-                video.transferTo(uploadPath);
+                video.transferTo(uploadPathFile);
                 videoUrl = "/video/" + fileName;
             } catch (IOException e) {
                 response.addCookie(new Cookie("errorMsg", "video上传失败"));

@@ -2,27 +2,22 @@ package com.jzh.lonershub.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jzh.lonershub.bean.Diary;
 import com.jzh.lonershub.bean.Loner;
 import com.jzh.lonershub.bean.LonerForm;
 import com.jzh.lonershub.service.DiaryService;
 import com.jzh.lonershub.service.LonerService;
-import org.apache.catalina.connector.Request;
+import com.jzh.lonershub.util.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.util.DecodeUtils;
-import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -30,16 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLDecoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @description: 用户控制器，包括登录，注册，修改信息等功能
@@ -100,22 +87,23 @@ public class LonerController {
         MultipartFile lonerAvatar = lonerForm.getLonerAvatar();
         if (lonerAvatar.getSize() > 0) {
             // 获取图片类型
-            String type = lonerAvatar.getContentType();
-            String myType;
-            if (type != null) {
-                myType = type.substring(type.indexOf('/') + 1);
-            } else {
+            String fileType = FileUtils.getFileType(lonerAvatar);
+            if (fileType == null) {
                 response.addCookie(new Cookie("errorMsg", "图片格式错误"));
                 return "register";
             }
-            // 获取上传地址
-            File relativePath = new File(URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(), "utf-8"));
-            File path = relativePath.getAbsoluteFile(); // 获取路径为： ${project}/target/classes/ 或者 ${jar包}/
-            String fileName = System.currentTimeMillis() + "." + myType;
-            File uploadPath = new File(path, "/static/avatar/" + fileName);
-            if (!uploadPath.exists()) uploadPath.mkdirs();
+
+            // 设置文件名
+            String fileName = System.currentTimeMillis() + "." + fileType;
+
+            // 获取上传路径
+            String uploadPath = FileUtils.getUploadPath("avatar", fileName);
+
+            // 上传文件
+            File uploadPathFile = new File(uploadPath);
+            if (!uploadPathFile.exists()) uploadPathFile.mkdirs();
             try {
-                lonerAvatar.transferTo(uploadPath);
+                lonerAvatar.transferTo(uploadPathFile);
                 lonerAvatarUrl = "/avatar/" + fileName;
             } catch (IOException e) {
                 response.addCookie(new Cookie("errorMsg", "图片上传失败"));
@@ -239,23 +227,24 @@ public class LonerController {
         // 如果修改头像
         if (lonerAvatar.getSize() > 0) {
             // 获取图片类型
-            String type = lonerAvatar.getContentType();
-            String myType;
-            if (type != null) {
-                myType = type.substring(type.indexOf('/') + 1);
-            } else {
+            String fileType = FileUtils.getFileType(lonerAvatar);
+            if (fileType == null) {
                 response.addCookie(new Cookie("errorMsg", "图片格式错误"));
                 request.getRequestDispatcher("/success").forward(request, response);
                 return null;
             }
-            // 获取上传地址
-            File relativePath = new File(URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(), "utf-8"));
-            File path = relativePath.getAbsoluteFile(); // 获取路径为： ${project}/target/classes/ 或者 ${jar包}/
-            String fileName = System.currentTimeMillis() + "." + myType;
-            File uploadPath = new File(path, "/static/avatar/" + fileName);
-            if (!uploadPath.exists()) uploadPath.mkdirs();
+
+            // 设置文件名
+            String fileName = System.currentTimeMillis() + "." + fileType;
+
+            // 获取上传路径
+            String uploadPath = FileUtils.getUploadPath("avatar", fileName);
+
+            // 上传文件
+            File uploadPathFile = new File(uploadPath);
+
             try {
-                lonerAvatar.transferTo(uploadPath);
+                lonerAvatar.transferTo(uploadPathFile);
                 String lonerAvatarUrl = "/avatar/" + fileName;
                 updateWrapper.set("lonerAvatarUrl", lonerAvatarUrl);
                 flag = true;
