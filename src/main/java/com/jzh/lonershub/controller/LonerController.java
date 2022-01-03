@@ -8,11 +8,10 @@ import com.jzh.lonershub.bean.Loner;
 import com.jzh.lonershub.bean.LonerForm;
 import com.jzh.lonershub.service.DiaryService;
 import com.jzh.lonershub.service.LonerService;
-import com.jzh.lonershub.util.FileUtils;
+import com.jzh.lonershub.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.ResourceUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +25,6 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
-import java.net.URLDecoder;
 
 /**
  * @description: 用户控制器，包括登录，注册，修改信息等功能

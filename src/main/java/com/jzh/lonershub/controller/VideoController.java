@@ -9,13 +9,12 @@ import com.jzh.lonershub.bean.Video;
 import com.jzh.lonershub.service.MessageService;
 import com.jzh.lonershub.service.ParticipantService;
 import com.jzh.lonershub.service.VideoService;
-import com.jzh.lonershub.util.FileUtils;
+import com.jzh.lonershub.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.ui.Model;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -234,9 +232,12 @@ public class VideoController {
         Loner successLoner = (Loner) session.getAttribute("successLoner");
         if (successLoner.getLonerId() == 1) {
             try {
-                QueryWrapper<Participant> queryWrapper = new QueryWrapper<>();
-                queryWrapper.eq("videoId", videoId);
-                participantService.remove(queryWrapper);
+                QueryWrapper<Participant> participantQueryWrapper = new QueryWrapper<>();
+                QueryWrapper<Message> messageQueryWrapper = new QueryWrapper<>();
+                participantQueryWrapper.eq("videoId", videoId);
+                messageQueryWrapper.eq("videoId", videoId);
+                participantService.remove(participantQueryWrapper);
+                messageService.remove(messageQueryWrapper);
                 videoService.removeById(videoId);
             } catch (Exception e) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

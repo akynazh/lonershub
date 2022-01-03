@@ -46,13 +46,13 @@
                     <td th:text="${video.getParticipantsNum()}">
                     </td>
                     <td>
-                        <a th:href="@{/theater/watch/(videoId=${video.getVideoId()})}">开始观看</a>
+                        <a th:href="@{/theater/watch(videoId=${video.getVideoId()})}">开始观看</a>
                     </td>
                     <td>
-                        <a th:href="@{/theater/reserve/(videoId=${video.getVideoId()})}">我要预约</a>
+                        <a th:href="@{/theater/reserve(videoId=${video.getVideoId()})}">我要预约</a>
                     </td>
                     <td>
-                        <a th:href="@{/theater/delete/(videoId=${video.getVideoId()})}">取消影片</a>
+                        <a th:href="@{/theater/delete(videoId=${video.getVideoId()})}">取消影片</a>
                     </td>
                 </tr>
                 </tbody>
