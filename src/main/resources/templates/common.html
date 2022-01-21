@@ -29,9 +29,6 @@
             <li th:class="${url.matches('/theater/?.*')?'active':''}">
                 <a th:href="@{/theater}">放映厅</a>
             </li>
-            <li th:class="${url.matches('/community/?.*')?'active':''}">
-                <a th:href="@{/community}">交流区</a>
-            </li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
             <li>
@@ -53,6 +50,8 @@
     </h1>
     <p>
         If you feel lonely, just come here, seek fun and share emotion with other loners!
+    </p>
+    <p th:text="'本站访问人数：' + ${session.count}">
     </p>
     <p>
         <a class="btn btn-primary btn-large" style="background: gray; border: gray" th:href="@{/login}">登录</a>

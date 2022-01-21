@@ -10,11 +10,11 @@
 
 这时，你发现了孤独，发现了自己已经变成了一个名副其实的孤独者，A Loner。
 
-每一个Loner都可以在LonersHub通过日记本记录自己的生活，在孤独者社区交流，甚至可以自己上传一部影片，并预约一个合适的时间，邀请其它孤独者一起观赏电影。
+每一个Loner都可以在LonersHub通过日记本记录自己的生活，可以自己上传一部影片，并预约一个合适的时间，邀请其它Loner一起观赏电影，并对影片进行愉快的评论。
 
 ### 工具介绍
 
-- 后端基于SpringBoot，Mybatis-Plus，Maven等构建。
+- 后端基于SpringBoot，Mybatis-Plus，MySQL，Redis等构建。
 - 前端采用Bootstrap，Thymeleaf，Ajax等构建。
 
 ## 快速搭建

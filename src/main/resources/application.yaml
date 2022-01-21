@@ -1,8 +1,8 @@
 spring:
   resources:
     static-locations:
-    - classpath:static/
-#    - file:D://@Akyna/Photo/static/  # 外部路径
+      - classpath:static/
+  #    - file:D://@Akyna/Photo/static/  # 外部路径
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
@@ -14,6 +14,9 @@ spring:
     multipart:
       max-file-size: 2GB
       max-request-size: 64GB
+  redis:
+    host: localhost
+    port: 6379
 
 mybatis-plus:
   configuration:
