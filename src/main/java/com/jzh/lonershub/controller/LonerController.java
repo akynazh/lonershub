@@ -4,17 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jzh.lonershub.bean.Diary;
-import com.jzh.lonershub.bean.Global;
 import com.jzh.lonershub.bean.Loner;
 import com.jzh.lonershub.bean.LonerForm;
+import com.jzh.lonershub.interceptor.VisitCountInterceptor;
 import com.jzh.lonershub.service.DiaryService;
-import com.jzh.lonershub.service.GlobalService;
 import com.jzh.lonershub.service.LonerService;
 import com.jzh.lonershub.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -37,22 +33,9 @@ import java.io.IOException;
  * @date 2021/12/28 14:54
  */
 @Controller
-@EnableScheduling
 public class LonerController {
     private LonerService lonerService;
     private DiaryService diaryService;
-    private StringRedisTemplate redisTemplate;
-    private GlobalService globalService;
-
-    @Autowired
-    public void setGlobalService(GlobalService globalService) {
-        this.globalService = globalService;
-    }
-
-    @Autowired
-    public void setRedisTemplate(StringRedisTemplate redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
 
     @Autowired
     public void setLonerService(LonerService lonerService) {
@@ -64,23 +47,11 @@ public class LonerController {
         this.diaryService = diaryService;
     }
 
-    // 每一分钟持久化到数据库一次
-    @Scheduled(fixedDelay = 1000 * 60)
-    public void setVisitCount() {
-        String count = redisTemplate.opsForValue().get("visit");
-        assert count != null;
-        UpdateWrapper<Global> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("id", 1);
-        updateWrapper.set("visitCount", Long.valueOf(count));
-        globalService.update(updateWrapper);
-    }
+
 
     @GetMapping(value = {"/index", "/"})
     public String index(HttpSession session) {
-        QueryWrapper<Global> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("id", 1);
-        Global global = globalService.getOne(queryWrapper);
-        session.setAttribute("count", global.getVisitCount());
+        session.setAttribute("count", VisitCountInterceptor.visitCount);
         return "index";
     }
 
@@ -201,8 +172,8 @@ public class LonerController {
      */
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        session.invalidate();
-        return "index";
+        session.removeAttribute("successLoner");
+        return "redirect:/index";
     }
 
     /**
