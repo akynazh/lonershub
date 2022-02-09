@@ -18,7 +18,7 @@ public class EnterInterceptor implements HandlerInterceptor {
             return true;
         }
         response.addCookie(new Cookie("errorMsg", "请先进行登录"));
-        request.getRequestDispatcher("/").forward(request, response);
+        response.sendRedirect("/");
         return false;
     }
 }

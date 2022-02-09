@@ -220,7 +220,7 @@ Query OK, 0 rows affected (0.00 sec)
 
 ```bash
 [root@VM-0-11-centos ~]# systemctl enable mysqld
-[root@VM-0-11-centos ~]# systemctl daemon-reload
+[root@VM-0-11-centos ~]# systemctl daemon-reload # 重新加载某个服务的配置文件
 
 ```
 ##### 设置mysql默认编码为utf-8
@@ -272,6 +272,34 @@ mysql> SHOW VARIABLES LIKE 'character%';
 ##### 建立数据库并新建表。
 
 通过sql脚本快速建成。
+
+### 配置redis环境
+
+#### yum安装redis
+
+```bash
+yum install redis
+```
+
+#### 启动redis
+
+默认启动在了6379端口，如需特殊指定可在/etc/redis.conf中修改默认配置
+
+```bash
+systemctl start redis
+
+ps -ef | grep redis # 检查是否已经启动
+
+redis 12105 1 0 00:44 ? 00:00:01 /usr/bin/redis-server 127.0.0.1:6379
+```
+
+#### 设置开机自启动redis
+
+```bash
+systemctl enable redis
+```
+
+
 
 ### 生成，上传并运行JAR包项目
 

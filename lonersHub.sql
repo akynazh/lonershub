@@ -59,7 +59,9 @@ CREATE TABLE t_global
     visitCount LONG,
     id INT PRIMARY KEY
 );
+INSERT INTO t_global(id, visitCount) VALUES (1, 1);
 
+# 如果已经默认设置了utf8则不用进行下面代码
 ALTER DATABASE lonersHub DEFAULT CHARACTER SET utf8;
 ALTER TABLE t_loner
     CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;

@@ -173,7 +173,7 @@ public class LonerController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.removeAttribute("successLoner");
-        return "redirect:/index";
+        return "redirect:/";
     }
 
     /**
