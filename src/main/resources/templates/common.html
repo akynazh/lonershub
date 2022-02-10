@@ -9,7 +9,7 @@
     </div>
 </head>
 <body>
-<nav th:fragment="common_nav" class="navbar navbar-default navbar-inverse" role="navigation">
+<nav th:fragment="common_nav" class="navbar navbar-default navbar-inverse" role="navigation" style="margin: 0; border-radius: 0">
     <div class="alert"></div>
     <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
@@ -29,22 +29,44 @@
             <li th:class="${url.matches('/theater/?.*')?'active':''}">
                 <a th:href="@{/theater}">放映厅</a>
             </li>
+            <li>
+                <a href="https://akynazh.site">博客</a>
+            </li>
+            <li>
+                <a href="https://github.com/akynazh/LonersHub">项目地址</a>
+            </li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-            <li>
-                <a href="https://github.com/akynazh/LonersHub">Github</a>
+            <li th:if="${session.successLoner != null}">
+                <a href="#" data-toggle="dropdown" class="dropdown-toggle" th:text="${session.successLoner.getLonerName()}"><strong class="caret"></strong></a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a th:href="@{/success}">个人空间</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/logout}">退出登录</a>
+                    </li>
+                </ul>
             </li>
-            <li>
-                <a href="https://akynazh.site">友链</a>
+            <li th:if="${session.successLoner == null}">
+                <a href="#" data-toggle="dropdown" class="dropdown-toggle" th:text="未登录"><strong class="caret"></strong></a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a th:href="@{/login}">登录</a>
+                    </li>
+                    <li>
+                        <a th:href="@{/register}">注册</a>
+                    </li>
+                </ul>
             </li>
-            <li>
-                <a th:href="@{/logout}">退出登录</a>
+            <li th:if="${session.successLoner != null}">
+                <img class="img-responsive" style="width: 50px; height: 50px" th:src="${session.successLoner.getLonerAvatarUrl()}"/>
             </li>
         </ul>
     </div>
 
 </nav>
-<div th:fragment="common_header" class="jumbotron" style="background-image: linear-gradient(to bottom, black, white)">
+<div th:fragment="common_header" class="jumbotron" style="background-image: linear-gradient(to bottom, black, white); margin: 0; border-radius: 0">
     <h1>
         Welcome To LonersHub!
     </h1>
@@ -61,7 +83,7 @@
 
     </p>
 </div>
-<div th:fragment="common_slider" class="carousel slide" id="carousel-810691" style="border-radius: 25px">
+<div th:fragment="common_slider" class="carousel slide" id="carousel-810691" style="border-radius: 0; margin: 0; ">
     <ol class="carousel-indicators">
         <li class="active" data-slide-to="0" data-target="#carousel-810691">
         </li>
@@ -101,23 +123,6 @@
                                                                     href="#carousel-810691"
                                                                     data-slide="next"><span
         class="glyphicon glyphicon-chevron-right"></span></a>
-</div>
-<div th:fragment="common_desc" class="col-md-4 column">
-    <div class="list-group">
-        <div class="list-group-item active" style="background: gray; border: gray;
-                        text-align: center; border-radius: 20px 20px 0 0">用户名</div>
-        <div class="list-group-item">
-            <h3 style="color: black; font-style: italic; text-align: center; font-weight: bold"
-                th:text="${session.successLoner.getLonerName()}"></h3>
-        </div>
-        <img class="img-responsive" alt="140x140" th:src="${session.successLoner.getLonerAvatarUrl()}"/>
-        <div class="list-group-item">
-            <h3 style="color: black; text-align: center; font-style: italic"
-                th:text="${session.successLoner.getLonerSignature()}"></h3>
-        </div>
-        <div class="list-group-item active" style="background: gray; border: gray;
-                        text-align: center; border-radius: 0 0 20px 20px">个性签名</div>
-    </div>
 </div>
 
 <div th:fragment="common_script">

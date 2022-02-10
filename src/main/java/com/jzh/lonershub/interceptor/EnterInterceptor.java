@@ -3,7 +3,6 @@ package com.jzh.lonershub.interceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -17,7 +16,6 @@ public class EnterInterceptor implements HandlerInterceptor {
         if (successLoner != null) {
             return true;
         }
-        response.addCookie(new Cookie("errorMsg", "请先进行登录"));
         response.sendRedirect("/");
         return false;
     }

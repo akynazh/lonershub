@@ -76,12 +76,7 @@ public class LonerController {
 
         // 判断表单是否填写有误
         if (br.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-            for (ObjectError error : br.getAllErrors()) {
-                errorMsg.append(error.getDefaultMessage()).append("~");
-            }
-            response.addCookie(new Cookie("errorMsg", errorMsg.toString()));
-            return "register";
+            return "redirect:/";
         }
 
         // 处理头像上传并获取图片地址
@@ -91,8 +86,7 @@ public class LonerController {
             // 获取图片类型
             String fileType = FileUtils.getFileType(lonerAvatar);
             if (fileType == null) {
-                response.addCookie(new Cookie("errorMsg", "图片格式错误"));
-                return "register";
+                return "redirect:/";
             }
 
             // 设置文件名
@@ -108,9 +102,7 @@ public class LonerController {
                 lonerAvatar.transferTo(uploadPathFile);
                 lonerAvatarUrl = "/avatar/" + fileName;
             } catch (IOException e) {
-                response.addCookie(new Cookie("errorMsg", "图片上传失败"));
-                e.printStackTrace();
-                return "register";
+                return "redirect:/";
             }
         }
 
@@ -119,8 +111,7 @@ public class LonerController {
         queryWrapper.eq("lonerEmail", lonerForm.getLonerEmail());
         Loner one = lonerService.getOne(queryWrapper);
         if (one != null) {
-            response.addCookie(new Cookie("errorMsg", "邮箱已经被注册"));
-            return "register";
+            return "redirect:/";
         }
 
         // 写入数据库
@@ -136,8 +127,7 @@ public class LonerController {
             System.out.println(loner);
             session.setAttribute("successLoner", loner);
         } else {
-            response.addCookie(new Cookie("errorMsg", "注册失败，请重试"));
-            return "register";
+            return "redirect:/";
         }
         return "redirect:/success";
     }
@@ -160,8 +150,7 @@ public class LonerController {
             session.setAttribute("successLoner", loner);
             return "redirect:/success";
         } else {
-            response.addCookie(new Cookie("errorMsg", "账号或密码错误"));
-            return "login";
+            return "redirect:/";
         }
     }
 
@@ -215,14 +204,7 @@ public class LonerController {
 
         // 判断表单是否填写有误
         if (br.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-            for (ObjectError error : br.getAllErrors()) {
-                errorMsg.append(error.getDefaultMessage()).append("~");
-            }
-            Cookie cookie = new Cookie("errorMsg", errorMsg.toString());
-            response.addCookie(cookie);
-            request.getRequestDispatcher("/success").forward(request, response);
-            return null;
+            return "redirect:/success";
         }
 
         MultipartFile lonerAvatar = lonerForm.getLonerAvatar();
@@ -231,9 +213,7 @@ public class LonerController {
             // 获取图片类型
             String fileType = FileUtils.getFileType(lonerAvatar);
             if (fileType == null) {
-                response.addCookie(new Cookie("errorMsg", "图片格式错误"));
-                request.getRequestDispatcher("/success").forward(request, response);
-                return null;
+                return "redirect:/success";
             }
 
             // 设置文件名
@@ -251,10 +231,7 @@ public class LonerController {
                 updateWrapper.set("lonerAvatarUrl", lonerAvatarUrl);
                 flag = true;
             } catch (IOException e) {
-                response.addCookie(new Cookie("errorMsg", "图片上传失败"));
-                e.printStackTrace();
-                request.getRequestDispatcher("/success").forward(request, response);
-                return null;
+                return "redirect:/success";
             }
         }
 
@@ -265,9 +242,7 @@ public class LonerController {
             queryWrapper.eq("lonerEmail", lonerForm.getLonerEmail());
             Loner one = lonerService.getOne(queryWrapper);
             if (one != null) {
-                response.addCookie(new Cookie("errorMsg", "邮箱已经被注册"));
-                request.getRequestDispatcher("/success").forward(request, response);
-                return null;
+                return "redirect:/success";
             } else {
                 updateWrapper.set("lonerEmail", lonerForm.getLonerEmail());
                 flag = true;
@@ -299,9 +274,7 @@ public class LonerController {
                 Loner newLoner = lonerService.getOne(new QueryWrapper<Loner>().eq("lonerId", successLoner.getLonerId()));
                 session.setAttribute("successLoner", newLoner);
             } else {
-                response.addCookie(new Cookie("errorMsg", "保存失败"));
-                request.getRequestDispatcher("/success").forward(request, response);
-                return null;
+                return "redirect:/success";
             }
         }
         return "redirect:/success";

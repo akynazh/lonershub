@@ -69,9 +69,7 @@ public class VideoController {
             // 获取video类型
             String fileType = FileUtils.getFileType(video);
             if (fileType == null) {
-                response.addCookie(new Cookie("errorMsg", "video格式错误"));
-                request.getRequestDispatcher("/success").forward(request, response);
-                return null;
+                return "redirect:/success";
             }
 
             // 设置文件名
@@ -86,15 +84,10 @@ public class VideoController {
                 video.transferTo(uploadPathFile);
                 videoUrl = "/video/" + fileName;
             } catch (IOException e) {
-                response.addCookie(new Cookie("errorMsg", "video上传失败"));
-                e.printStackTrace();
-                request.getRequestDispatcher("/success").forward(request, response);
-                return null;
+                return "redirect:/success";
             }
         } else {
-            response.addCookie(new Cookie("errorMsg", "请选择video"));
-            request.getRequestDispatcher("/success").forward(request, response);
-            return null;
+            return "redirect:/success";
         }
         Video myVideo = new Video();
         myVideo.setVideoUrl(videoUrl);
@@ -112,10 +105,7 @@ public class VideoController {
             participant.setParticipantId(successLoner.getLonerId());
             participantService.save(participant);
         } catch (Exception e) {
-            e.printStackTrace();
-            response.addCookie(new Cookie("errorMsg", "上传失败"));
-            request.getRequestDispatcher("/success").forward(request, response);
-            return null;
+            return "redirect:/success";
         }
         return "redirect:/success";
     }
@@ -162,9 +152,7 @@ public class VideoController {
         List<Participant> list = participantService.list(queryWrapper);
         for (Participant participant : list) {
             if (participant.getVideoId().equals(videoId)) {
-                response.addCookie(new Cookie("errorMsg", "已经预约过咯"));
-                request.getRequestDispatcher("/theater").forward(request, response);
-                return null;
+                return "redirect:/theater";
             }
         }
         Participant participant = new Participant();
@@ -180,10 +168,7 @@ public class VideoController {
             videoService.update(updateWrapper);
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            response.addCookie(new Cookie("errorMsg", "预约失败"));
-            request.getRequestDispatcher("/theater").forward(request, response);
-            e.printStackTrace();
-            return null;
+            return "redirect:/theater";
         }
         return "redirect:/theater";
     }
@@ -198,7 +183,6 @@ public class VideoController {
                         Model model, HttpServletRequest request) throws ParseException, IOException, ServletException {
         Video video = videoService.getById(videoId);
         if (video == null) {
-            response.addCookie(new Cookie("errorMsg", "访问失败"));
             return "redirect:/theater";
         }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -219,9 +203,7 @@ public class VideoController {
             model.addAttribute("moreMessageList", moreMessageList);
             return "watch";
         } else {
-            response.addCookie(new Cookie("errorMsg", "该影片还未到播放时间"));
-            request.getRequestDispatcher("/theater").forward(request, response);
-            return null;
+            return "redirect:/theater";
         }
     }
 
@@ -241,15 +223,10 @@ public class VideoController {
                 videoService.removeById(videoId);
             } catch (Exception e) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                response.addCookie(new Cookie("errorMsg", "删除失败"));
-                request.getRequestDispatcher("/theater").forward(request, response);
-                e.printStackTrace();
-                return null;
+                return "redirect:/theater";
             }
         } else {
-            response.addCookie(new Cookie("errorMsg", "没有权限"));
-            request.getRequestDispatcher("/theater").forward(request, response);
-            return null;
+            return "redirect:/theater";
         }
         return "redirect:/theater";
     }

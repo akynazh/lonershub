@@ -1,8 +1,9 @@
 * {
-    font-family: "Times New Roman", SansSerif, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
     color: white;
 }
 
+/* 触发方式: $('.alert').html("errorMsg").addClass('alert-info').show().delay(1500).fadeOut();*/
 .alert {
     display: none;
     position: fixed;

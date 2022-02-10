@@ -5,44 +5,54 @@
     <title>Space</title>
     <div th:replace="common :: common_css"></div>
 </head>
-<body style="background-image: linear-gradient(to right, black, white)">
+<body style="background: black">
 <div class="container">
     <div class="row clearfix">
         <div class="col-md-12 column">
-            <nav th:replace="common :: common_nav"></nav>
+            <nav th:replace="common :: common_nav">
+            </nav>
+            <div th:replace="common :: common_slider"></div>
             <div class="row clearfix">
-                <div class="col-md-8 column">
+                <div class="col-md-12 column">
                     <div class="tabbable" id="tabs-350492">
                         <ul class="nav nav-tabs">
                             <li class="active">
-                                <a href="#panel-69185" data-toggle="tab">生活记录</a>
+                                <a href="#panel-69185" data-toggle="tab" style="color: gray">生活记录</a>
                             </li>
                             <li>
-                                <a href="#panel-989949" data-toggle="tab">撰写日记</a>
+                                <a href="#panel-989949" data-toggle="tab" style="color: gray">撰写日记</a>
                             </li>
                             <li>
-                                <a href="#panel-658766" data-toggle="tab">上传影片</a>
+                                <a href="#panel-658766" data-toggle="tab" style="color: gray">上传影片</a>
                             </li>
                             <li>
-                                <a href="#panel-123456" data-toggle="tab">修改信息</a>
+                                <a href="#panel-123456" data-toggle="tab" style="color: gray">修改信息</a>
                             </li>
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane active" id="panel-69185">
-                                <div class="jumbotron" style="color:white; background-image: linear-gradient(to right, gray, black); border-radius: 0 0 25px 25px">
+                                <div class="jumbotron" style="color:white; background-image: linear-gradient(to right, gray, black)">
                                     <ul class="pagination" th:with="cur=${session.diaryPage.getCurrent()}, sum=${session.diaryPage.getPages()},
-                                        diaries=${session.diaryPage.getRecords()}">
+                                        diaries=${session.diaryPage.getRecords()}" style="width: 70%">
+                                        <div class="panel panel-default" style="background: black;">
+                                            <div class="panel-heading">
+                                                <h3 class="panel-title" th:text="个性签名"></h3>
+                                            </div>
+                                            <div class="panel-body">
+                                                <div th:text="${session.successLoner.getLonerSignature()}" style="color: red;"></div>
+                                            </div>
+                                        </div>
                                         <div th:each="diary:${diaries}">
-                                            <div class="panel panel-default" style="background: black; border-radius: 20px">
-                                                <div class="panel-heading" style="border-radius: 20px 20px 0 0">
+                                            <div class="panel panel-default" style="background: black">
+                                                <div class="panel-heading">
                                                     <h3 class="panel-title" th:text="${diary.getCreateTime()}"></h3>
                                                 </div>
-                                                <div class="panel-body" style="background: black; border-radius: 20px">
-                                                    <div th:text="${diary.getContent()}" style="clear: both; width: auto; word-break: break-all"></div>
+                                                <div class="panel-body">
+                                                    <div th:text="${diary.getContent()}"></div>
                                                 </div>
                                                 <div class="deleteDiv" style="display: none">
                                                     <form th:action="@{/success/diary/delete(id=${diary.getDiaryId()})}" method="post">
-                                                        <input type="submit" value="删除" class="btn btn-default" style="border-radius: 0 20px 0 20px"/>
+                                                        <input type="submit" value="删除" class="btn btn-default"/>
                                                     </form>
                                                 </div>
                                             </div>
@@ -56,7 +66,7 @@
                                 </div>
                             </div>
                             <div class="tab-pane" id="panel-989949">
-                                <div class="jumbotron" style="color:white; background-image: linear-gradient(to right, gray, black); border-radius: 0 0 25px 25px">
+                                <div class="jumbotron" style="color:white; background-image: linear-gradient(to right, gray, black)">
                                     <h2>White Your Things Here</h2>
                                     <p>Express your feels by writing something</p>
                                     <form role="form" method="post" th:action="@{/success/diary/write}">
@@ -71,7 +81,7 @@
                                 </div>
                             </div>
                             <div class="tab-pane" id="panel-658766">
-                                <div class="jumbotron" style="color:white; background-image: linear-gradient(to right, gray, black); border-radius: 0 0 25px 25px">
+                                <div class="jumbotron" style="color:white; background-image: linear-gradient(to right, gray, black)">
                                     <h2>Choose A Video And Set A Time</h2>
                                     <p>Enjoy your time with other loners</p>
                                     <form role="form" method="post" th:action="@{/success/upload}"
@@ -100,7 +110,7 @@
                                 </div>
                             </div>
                             <div class="tab-pane" id="panel-123456">
-                                <div class="jumbotron" style="color:white; background-image: linear-gradient(to right, gray, black); border-radius: 0 0 25px 25px">
+                                <div class="jumbotron" style="color:white; background-image: linear-gradient(to right, gray, black)">
                                     <h2>Change Yourself</h2>
                                     <form role="form" method="post" th:action="@{/success/modify}" enctype="multipart/form-data">
                                         <div class="form-group">
@@ -149,8 +159,6 @@
                         </div>
                     </div>
                 </div>
-
-                <div th:replace="common :: common_desc"></div>
             </div>
         </div>
     </div>
