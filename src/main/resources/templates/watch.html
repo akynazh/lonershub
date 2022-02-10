@@ -12,10 +12,10 @@
             <nav th:replace="common :: common_nav"></nav>
             <div class="embed-responsive embed-responsive-16by9">
                 <video width="320" height="240" controls>
-                    <source type="video/mp4" th:src="${video.getVideoUrl()}">
+                    <source type="video/mp4" th:src="${session.video.getVideoUrl()}">
                 </video>
             </div>
-            <input id="videoId" th:value="${video.getVideoId()}" style="display: none">
+            <input id="videoId" th:value="${session.video.getVideoId()}" style="display: none">
             <input id="message-content" type="text" placeholder="写下你的评论吧...."
                    style="background: black; color: white; width: 90%; border-radius: 10px; font-size: 15px">
             <button type="submit" id="message-submit" style="background: black; color: white;
@@ -27,13 +27,13 @@
                 <!-- List group -->
                 <ul class="list-group" id="messageList" style="background: black">
                     <li id="newComment" style="display: none"></li>
-                    <li th:each="message:${messageList}" th:text="'#' + ${message.getCreateTime()} + '#&nbsp[' + ${message.getCreatorName()} + ']:&nbsp&nbsp' +
+                    <li th:each="message:${session.messageList}" th:text="'#' + ${message.getCreateTime()} + '#&nbsp[' + ${message.getCreatorName()} + ']:&nbsp&nbsp' +
                     ${message.getContent()}" class="list-group-item" style="background: black"></li>
                 </ul>
                 <button type="submit" id="message-load" style="background: black; color: white;
             border-radius: 5px; font-size: 10px;">>>>>> LOAD MORE >>>>></button>
                 <ul class="list-group" id="more-messageList" style="background: black; display: none">
-                    <li th:each="message:${moreMessageList}" th:text="'#' + ${message.getCreateTime()} + '#&nbsp[' + ${message.getCreatorName()} + ']:&nbsp&nbsp' +
+                    <li th:each="message:${session.moreMessageList}" th:text="'#' + ${message.getCreateTime()} + '#&nbsp[' + ${message.getCreatorName()} + ']:&nbsp&nbsp' +
                     ${message.getContent()}" class="list-group-item" style="background: black;"></li>
                 </ul>
             </div>

@@ -70,7 +70,7 @@ public class DiaryController {
 
     @PostMapping(value = "/success/diary/delete")
     public String delete(@RequestParam Integer id, RedirectAttributesModelMap model,
-                         HttpSession session) throws ServletException, IOException {
+                         HttpSession session)  {
         if (!diaryService.removeById(id)) {
             model.addFlashAttribute("msg", "删除失败，请重试");
             return "redirect:/success";

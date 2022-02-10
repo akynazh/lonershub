@@ -8,12 +8,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @TableName("t_video")
-public class Video {
+public class Video implements Serializable {
     private String startTime;
     private Integer publisherId;
     @TableId(value = "videoId", type = IdType.AUTO)

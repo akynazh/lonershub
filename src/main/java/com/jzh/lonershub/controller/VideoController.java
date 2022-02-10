@@ -152,7 +152,7 @@ public class VideoController {
     @GetMapping(value = "/theater/reserve")
     @Transactional
     public String reserve(@RequestParam Integer videoId, HttpSession session,
-                          RedirectAttributesModelMap model) throws ServletException, IOException {
+                          RedirectAttributesModelMap model) {
         Loner successLoner = (Loner) session.getAttribute("successLoner");
         Integer lonerId = successLoner.getLonerId();
         QueryWrapper<Participant> queryWrapper = new QueryWrapper<>();
@@ -189,7 +189,8 @@ public class VideoController {
      * @date 2021/12/30 23:44
      */
     @GetMapping(value = "/theater/watch")
-    public String watch(@RequestParam Integer videoId, RedirectAttributesModelMap model) throws ParseException, IOException, ServletException {
+    public String watch(@RequestParam Integer videoId, RedirectAttributesModelMap model,
+                        HttpSession session) throws ParseException, IOException, ServletException {
         Video video = videoService.getById(videoId);
         if (video == null) {
             model.addFlashAttribute("msg", "video过不存在");
@@ -208,9 +209,9 @@ public class VideoController {
             moreMessageList = originMessageList.subList(10, originMessageList.size());
         }
         if (now.compareTo(videoDate) > 0) {
-            model.addFlashAttribute("video", video);
-            model.addFlashAttribute("messageList", messageList);
-            model.addFlashAttribute("moreMessageList", moreMessageList);
+            session.setAttribute("video", video);
+            session.setAttribute("messageList", messageList);
+            session.setAttribute("moreMessageList", moreMessageList);
             return "watch";
         } else {
             model.addFlashAttribute("msg", "未到播放时间");

@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 /**
  * @version 1.0
  * @description video参与者
@@ -19,7 +21,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @TableName("t_participant")
-public class Participant {
+public class Participant implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     private Integer videoId;

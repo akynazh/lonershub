@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 /**
  * @version 1.0
  * @description
@@ -18,6 +20,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @TableName("t_global")
-public class Global {
+public class Global implements Serializable {
     private Long visitCount;
 }

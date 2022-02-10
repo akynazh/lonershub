@@ -9,13 +9,14 @@ import org.hibernate.validator.constraints.Length;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @TableName("t_loner")
-public class LonerForm {
+public class LonerForm implements Serializable {
     private Integer lonerId;
 
     @NotBlank(message = "用户名不能为空")

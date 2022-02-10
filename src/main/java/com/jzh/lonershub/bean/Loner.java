@@ -9,13 +9,14 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.validation.Valid;
+import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @TableName("t_loner")
-public class Loner {
+public class Loner implements Serializable {
     @TableId(value = "lonerId", type = IdType.AUTO)
     private Integer lonerId;
     private String lonerName;
