@@ -14,7 +14,7 @@
     z-index: 99999;
     padding: 15px;
     border: 1px solid transparent;
-    border-radius: 10px;
+    border-radius: 5px;
 }
 .alert-info {
     color: white;

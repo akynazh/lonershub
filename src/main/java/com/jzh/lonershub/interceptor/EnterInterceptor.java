@@ -16,7 +16,7 @@ public class EnterInterceptor implements HandlerInterceptor {
         if (successLoner != null) {
             return true;
         }
-        response.sendRedirect("/");
+        response.sendRedirect("/loginFirst");
         return false;
     }
 }

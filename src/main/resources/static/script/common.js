@@ -1,4 +1,8 @@
 $(document).ready(function () {
+    let msg = $('#msg').val();
+    if (msg !== '' && msg != null) {
+        $('.alert').html(msg).addClass('alert-info').show().delay(1500).fadeOut();
+    }
     $('#deleteDiary').click(function () {
         $('.deleteDiv').css('display', 'block');
     })

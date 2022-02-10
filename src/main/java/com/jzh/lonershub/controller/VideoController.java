@@ -17,6 +17,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -59,54 +60,60 @@ public class VideoController {
     @Transactional
     public String uploadVideo(@RequestParam String startTime, @RequestPart MultipartFile video,
                               @RequestParam String description, @RequestParam String videoName, HttpSession session,
-                              HttpServletResponse response, HttpServletRequest request) throws IOException, ServletException {
+                              RedirectAttributesModelMap model) throws IOException {
         // 格式化开始时间
         startTime = startTime.replace("T", " ");
         startTime = startTime.concat(":00");
         String videoUrl = null;
+
         // 处理视频上传
         if (video.getSize() > 0) {
             // 获取video类型
             String fileType = FileUtils.getFileType(video);
             if (fileType == null) {
+                model.addFlashAttribute("msg", "文件类型出错");
                 return "redirect:/success";
             }
 
             // 设置文件名
             String fileName = System.currentTimeMillis() + "." + fileType;
 
+            // 图片路径
+            videoUrl = "/video/" + fileName;
+
             // 获取上传路径
             String uploadPath = FileUtils.getUploadPath("video", fileName);
-
             File uploadPathFile = new File(uploadPath);
             if (!uploadPathFile.exists()) uploadPathFile.mkdirs();
+
+            // 创建video对象
+            Video myVideo = new Video();
+            myVideo.setVideoUrl(videoUrl);
+            Loner successLoner = (Loner) session.getAttribute("successLoner");
+            myVideo.setPublisherId(successLoner.getLonerId());
+            myVideo.setDescription(description);
+            myVideo.setStartTime(startTime);
+            myVideo.setVideoName(videoName);
+            myVideo.setParticipantsNum(1);
+
+            // 处理上传业务
             try {
                 video.transferTo(uploadPathFile);
-                videoUrl = "/video/" + fileName;
-            } catch (IOException e) {
+                videoService.save(myVideo);
+                Participant participant = new Participant();
+                participant.setVideoId(myVideo.getVideoId());
+                participant.setParticipantId(successLoner.getLonerId());
+                participantService.save(participant);
+            } catch (Exception e) {
+                model.addFlashAttribute("msg", "上传失败，请重试");
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return "redirect:/success";
             }
         } else {
+            model.addFlashAttribute("msg", "请选择video");
             return "redirect:/success";
         }
-        Video myVideo = new Video();
-        myVideo.setVideoUrl(videoUrl);
-        Loner successLoner = (Loner) session.getAttribute("successLoner");
-        myVideo.setPublisherId(successLoner.getLonerId());
-        myVideo.setDescription(description);
-        myVideo.setStartTime(startTime);
-        myVideo.setVideoName(videoName);
-        myVideo.setParticipantsNum(1);
-
-        try {
-            videoService.save(myVideo);
-            Participant participant = new Participant();
-            participant.setVideoId(myVideo.getVideoId());
-            participant.setParticipantId(successLoner.getLonerId());
-            participantService.save(participant);
-        } catch (Exception e) {
-            return "redirect:/success";
-        }
+        model.addFlashAttribute("msg", "上传成功");
         return "redirect:/success";
     }
 
@@ -116,7 +123,7 @@ public class VideoController {
      * @date 2021/12/30 23:43
      */
     @GetMapping(value = "/theater")
-    public String theater(HttpSession session) {
+    public String theater(HttpSession session, RedirectAttributesModelMap model) {
         List<Video> list = videoService.list();
         List<Video> videoList = new ArrayList<>();
         // 只取出未来五天和过去五天的预约影片
@@ -133,6 +140,7 @@ public class VideoController {
             }
         }
         session.setAttribute("videoList", videoList);
+        model.addFlashAttribute("msg", "上传成功");
         return "theater";
     }
 
@@ -144,7 +152,7 @@ public class VideoController {
     @GetMapping(value = "/theater/reserve")
     @Transactional
     public String reserve(@RequestParam Integer videoId, HttpSession session,
-                          HttpServletResponse response, HttpServletRequest request) throws ServletException, IOException {
+                          RedirectAttributesModelMap model) throws ServletException, IOException {
         Loner successLoner = (Loner) session.getAttribute("successLoner");
         Integer lonerId = successLoner.getLonerId();
         QueryWrapper<Participant> queryWrapper = new QueryWrapper<>();
@@ -152,6 +160,7 @@ public class VideoController {
         List<Participant> list = participantService.list(queryWrapper);
         for (Participant participant : list) {
             if (participant.getVideoId().equals(videoId)) {
+                model.addFlashAttribute("msg", "预约过了");
                 return "redirect:/theater";
             }
         }
@@ -168,6 +177,7 @@ public class VideoController {
             videoService.update(updateWrapper);
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            model.addFlashAttribute("msg", "预约失败，请重试");
             return "redirect:/theater";
         }
         return "redirect:/theater";
@@ -179,10 +189,10 @@ public class VideoController {
      * @date 2021/12/30 23:44
      */
     @GetMapping(value = "/theater/watch")
-    public String watch(@RequestParam Integer videoId, HttpServletResponse response,
-                        Model model, HttpServletRequest request) throws ParseException, IOException, ServletException {
+    public String watch(@RequestParam Integer videoId, RedirectAttributesModelMap model) throws ParseException, IOException, ServletException {
         Video video = videoService.getById(videoId);
         if (video == null) {
+            model.addFlashAttribute("msg", "video过不存在");
             return "redirect:/theater";
         }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -198,21 +208,25 @@ public class VideoController {
             moreMessageList = originMessageList.subList(10, originMessageList.size());
         }
         if (now.compareTo(videoDate) > 0) {
-            model.addAttribute("video", video);
-            model.addAttribute("messageList", messageList);
-            model.addAttribute("moreMessageList", moreMessageList);
+            model.addFlashAttribute("video", video);
+            model.addFlashAttribute("messageList", messageList);
+            model.addFlashAttribute("moreMessageList", moreMessageList);
             return "watch";
         } else {
+            model.addFlashAttribute("msg", "未到播放时间");
             return "redirect:/theater";
         }
     }
 
     @GetMapping(value = "/theater/delete")
     @Transactional
-    public String delete(@RequestParam Integer videoId, HttpServletResponse response,
-                         HttpSession session, HttpServletRequest request) throws ServletException, IOException {
+    public String delete(@RequestParam Integer videoId, RedirectAttributesModelMap model,
+                         HttpSession session) {
         Loner successLoner = (Loner) session.getAttribute("successLoner");
-        if (successLoner.getLonerId() == 1) {
+        QueryWrapper<Video> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("publisherId", videoId);
+        Video one = videoService.getOne(queryWrapper);
+        if (successLoner.getLonerId() == 1 || one.getPublisherId().equals(successLoner.getLonerId())) {
             try {
                 QueryWrapper<Participant> participantQueryWrapper = new QueryWrapper<>();
                 QueryWrapper<Message> messageQueryWrapper = new QueryWrapper<>();
@@ -223,11 +237,14 @@ public class VideoController {
                 videoService.removeById(videoId);
             } catch (Exception e) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                model.addFlashAttribute("msg", "删除失败，请重试");
                 return "redirect:/theater";
             }
         } else {
+            model.addFlashAttribute("msg", "没有权限，请联系管理员");
             return "redirect:/theater";
         }
+        model.addFlashAttribute("msg", "删除成功");
         return "redirect:/theater";
     }
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -38,9 +39,10 @@ public class DiaryController {
 
     @PostMapping(value = "/success/diary/write")
     public String write(@RequestParam String content, HttpSession session,
-                        HttpServletResponse response, HttpServletRequest request) throws Exception {
+                        RedirectAttributesModelMap model) {
         if (!StringUtils.hasText(content)) {
-            content = "无话可说...";
+            model.addFlashAttribute("msg", "请写点什么");
+            return "redirect:/success";
         }
         String creatTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         Diary diary = new Diary();
@@ -49,6 +51,7 @@ public class DiaryController {
         diary.setCreateTime(creatTime);
         diary.setContent(content);
         if (!diaryService.save(diary)) {
+            model.addFlashAttribute("msg", "保存失败，请重试");
             return "redirect:/success";
         }
 
@@ -60,14 +63,16 @@ public class DiaryController {
 
         Page<Diary> diaryPage = diaryService.page(new Page<>(1, 4), queryWrapper);
         session.setAttribute("diaryPage", diaryPage);
+        model.addFlashAttribute("msg", "保存成功");
         return "redirect:/success";
     }
 
 
     @PostMapping(value = "/success/diary/delete")
-    public String delete(@RequestParam Integer id, HttpServletResponse response,
-                         HttpSession session, HttpServletRequest request) throws ServletException, IOException {
+    public String delete(@RequestParam Integer id, RedirectAttributesModelMap model,
+                         HttpSession session) throws ServletException, IOException {
         if (!diaryService.removeById(id)) {
+            model.addFlashAttribute("msg", "删除失败，请重试");
             return "redirect:/success";
         }
 
@@ -80,6 +85,7 @@ public class DiaryController {
 
         Page<Diary> diaryPage = diaryService.page(new Page<>(1, 4), queryWrapper);
         session.setAttribute("diaryPage", diaryPage);
+        model.addFlashAttribute("msg", "删除成功");
         return "redirect:/success";
     }
 }

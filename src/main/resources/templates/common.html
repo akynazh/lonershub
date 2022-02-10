@@ -11,6 +11,11 @@
 <body>
 <nav th:fragment="common_nav" class="navbar navbar-default navbar-inverse" role="navigation" style="margin: 0; border-radius: 0">
     <div class="alert"></div>
+    <input id="msg" value="" style="display: none"/>
+    <script th:inline="javascript">
+        let msg = [[${msg}]];
+        document.getElementById("msg").setAttribute("value", msg.toString())
+    </script>
     <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
             <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span

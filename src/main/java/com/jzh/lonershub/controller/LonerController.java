@@ -17,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -48,7 +49,18 @@ public class LonerController {
     }
 
 
-
+    /**
+     * @description: 添加提示登录消息
+     * @author Jiang Zhihang
+     * @date 2022/2/11 0:01
+     */
+    @GetMapping("/loginFirst")
+    public String loginFirst(RedirectAttributesModelMap model) {
+        model.addFlashAttribute("msg", "请先进行登录");
+        return "redirect:/";
+    }
+    
+    
     @GetMapping(value = {"/index", "/"})
     public String index(HttpSession session) {
         session.setAttribute("count", VisitCountInterceptor.visitCount);
@@ -72,10 +84,24 @@ public class LonerController {
      */
     @PostMapping(value = "/register")
     public String register(@Valid LonerForm lonerForm, BindingResult br,
-                           HttpSession session, HttpServletResponse response, HttpServletRequest request) throws IOException {
+                           HttpSession session, RedirectAttributesModelMap model) throws IOException {
 
         // 判断表单是否填写有误
+        StringBuilder errors = new StringBuilder();
         if (br.hasErrors()) {
+            for (ObjectError error : br.getAllErrors()) {
+                errors.append(error.getDefaultMessage()).append("&");
+            }
+            model.addFlashAttribute("msg", errors);
+            return "redirect:/";
+        }
+
+        // 判断邮箱是否已经被注册
+        QueryWrapper<Loner> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("lonerEmail", lonerForm.getLonerEmail());
+        Loner one = lonerService.getOne(queryWrapper);
+        if (one != null) {
+            model.addFlashAttribute("msg", "邮箱已被注册");
             return "redirect:/";
         }
 
@@ -86,6 +112,7 @@ public class LonerController {
             // 获取图片类型
             String fileType = FileUtils.getFileType(lonerAvatar);
             if (fileType == null) {
+                model.addFlashAttribute("msg", "图片类型错误");
                 return "redirect:/";
             }
 
@@ -102,16 +129,9 @@ public class LonerController {
                 lonerAvatar.transferTo(uploadPathFile);
                 lonerAvatarUrl = "/avatar/" + fileName;
             } catch (IOException e) {
+                model.addFlashAttribute("msg", "上传失败，请重试");
                 return "redirect:/";
             }
-        }
-
-        // 判断邮箱是否已经被注册
-        QueryWrapper<Loner> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("lonerEmail", lonerForm.getLonerEmail());
-        Loner one = lonerService.getOne(queryWrapper);
-        if (one != null) {
-            return "redirect:/";
         }
 
         // 写入数据库
@@ -124,9 +144,10 @@ public class LonerController {
         loner.setLonerAvatarUrl(lonerAvatarUrl);
         boolean save = lonerService.save(loner);
         if (save) {
-            System.out.println(loner);
+            model.addFlashAttribute("msg", "注册成功");
             session.setAttribute("successLoner", loner);
         } else {
+            model.addFlashAttribute("msg", "注册失败，请重试");
             return "redirect:/";
         }
         return "redirect:/success";
@@ -141,7 +162,7 @@ public class LonerController {
     public String login(@RequestParam String lonerEmail,
                         @RequestParam String lonerPassword,
                         HttpSession session,
-                        HttpServletResponse response, HttpServletRequest request) {
+                        RedirectAttributesModelMap model) {
 
         QueryWrapper<Loner> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("lonerEmail", lonerEmail);
@@ -150,6 +171,7 @@ public class LonerController {
             session.setAttribute("successLoner", loner);
             return "redirect:/success";
         } else {
+            model.addFlashAttribute("msg", "密码错误或用户不存在");
             return "redirect:/";
         }
     }
@@ -160,8 +182,9 @@ public class LonerController {
      * @date 2021/12/28 14:56
      */
     @GetMapping("/logout")
-    public String logout(HttpSession session) {
+    public String logout(HttpSession session, RedirectAttributesModelMap model) {
         session.removeAttribute("successLoner");
+        model.addFlashAttribute("msg", "退出成功");
         return "redirect:/";
     }
 
@@ -172,7 +195,7 @@ public class LonerController {
      */
     @GetMapping(value = {"/success"})
     public String success(@RequestParam(defaultValue = "1") Integer pn,
-                          HttpSession session, Model model, HttpServletRequest request) {
+                          HttpSession session) {
         // 如果不是第一次加入到success页面且pn=1则直接返回无需多次操作数据库，在其他会修改diaryPage的地方修改对应session对象即可
         if (session.getAttribute("diaryPage") != null && pn == 1) return "success";
         // 获取当前Loner的ID
@@ -195,15 +218,19 @@ public class LonerController {
      */
     @PostMapping(value = "/success/modify")
     public String modify(@Valid LonerForm lonerForm, BindingResult br,
-                         HttpSession session, HttpServletResponse response,
-                         HttpServletRequest request) throws IOException, ServletException {
+                         HttpSession session, RedirectAttributesModelMap model) throws IOException, ServletException {
         Loner successLoner = (Loner) session.getAttribute("successLoner");
         UpdateWrapper<Loner> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("lonerId", successLoner.getLonerId());
         boolean flag = false; // 标记是否改变
 
         // 判断表单是否填写有误
+        StringBuilder errors = new StringBuilder();
         if (br.hasErrors()) {
+            for (ObjectError error : br.getAllErrors()) {
+                errors.append(error.getDefaultMessage()).append("&");
+            }
+            model.addFlashAttribute("msg", errors);
             return "redirect:/success";
         }
 
@@ -213,6 +240,7 @@ public class LonerController {
             // 获取图片类型
             String fileType = FileUtils.getFileType(lonerAvatar);
             if (fileType == null) {
+                model.addFlashAttribute("msg", "图像类型出错");
                 return "redirect:/success";
             }
 
@@ -231,6 +259,7 @@ public class LonerController {
                 updateWrapper.set("lonerAvatarUrl", lonerAvatarUrl);
                 flag = true;
             } catch (IOException e) {
+                model.addFlashAttribute("msg", "上传图片失败，请重试");
                 return "redirect:/success";
             }
         }
@@ -242,6 +271,7 @@ public class LonerController {
             queryWrapper.eq("lonerEmail", lonerForm.getLonerEmail());
             Loner one = lonerService.getOne(queryWrapper);
             if (one != null) {
+                model.addFlashAttribute("msg", "邮箱已被注册");
                 return "redirect:/success";
             } else {
                 updateWrapper.set("lonerEmail", lonerForm.getLonerEmail());
@@ -273,7 +303,9 @@ public class LonerController {
             if (update) {
                 Loner newLoner = lonerService.getOne(new QueryWrapper<Loner>().eq("lonerId", successLoner.getLonerId()));
                 session.setAttribute("successLoner", newLoner);
+                model.addFlashAttribute("msg", "保存成功");
             } else {
+                model.addFlashAttribute("msg", "保存失败，请重试");
                 return "redirect:/success";
             }
         }
